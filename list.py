@@ -14,7 +14,7 @@ def pluck_repo(r):
 
 def main():
 	parser = argparse.ArgumentParser('find initial repositories')
-	parser.add_argument('-n', '--max-count', type=int, metavar='COUNT', dest='max_count', help='Number of repositories to search', default=1)
+	parser.add_argument('-n', '--count', type=int, metavar='COUNT', dest='max_count', help='Number of repositories to search', default=1)
 	args = parser.parse_args()
 
 	config, g = common.connect()
