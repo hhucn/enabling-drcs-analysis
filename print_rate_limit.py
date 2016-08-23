@@ -11,7 +11,7 @@ def format_duration(secs):
 		return '%d hours' % (secs // 3600)
 	if secs > 60:
 		return '%d minutes' % (secs // 60)
-	return '%d secs'
+	return '%d secs' % secs
 
 
 def main():
@@ -19,10 +19,15 @@ def main():
 	args = parser.parse_args()
 
 	_, data = common.query('/rate_limit')
-	rate = data['rate']
+	now = time.time()
 
-	print('%d of %d remaining (reset in %s)' % (
-		rate['remaining'], rate['limit'], format_duration(rate['reset'] - time.time())))
+	for key, resource in sorted(data['resources'].items()):
+		print('%d of %d %s remaining (reset in %s)' % (
+			resource['remaining'],
+			resource['limit'],
+			key,
+			format_duration(resource['reset'] - now)))
+
 
 if __name__ == '__main__':
 	main()

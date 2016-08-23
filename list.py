@@ -6,23 +6,17 @@ import common
 import utils
 
 
-def pluck_repo(r):
-	return {
-		k: common.pluck_val(getattr(r, '_' + k))
-		for k in ['id', 'html_url', 'parent', 'forks_url']}
-
-
 def main():
 	parser = argparse.ArgumentParser('find initial repositories')
-	parser.add_argument('-n', '--count', type=int, metavar='COUNT', dest='max_count', help='Number of repositories to search', default=1)
+	parser.add_argument('-n', '--limit', type=int, metavar='COUNT', dest='limit', help='Number of repositories to search', default=1)
 	args = parser.parse_args()
 
-	config, g = common.connect()
-
-	res = []
-	for r in g.search_repositories('stars:>1', 'forks', 'desc')[:args.max_count]:
-		res.append(pluck_repo(r))
-
+	res = utils.progress_list(common.paged('/search/repositories', params={
+		'q': 'stars:>1',
+		'sort': 'forks',
+		'order': 'desc',
+		'per_page': 100,
+	}, limit=args.limit, get_list=lambda o: o['items']), args.limit)
 	print('Found %d repositories' % len(res))
 
 	utils.write_data('list', res)

@@ -1,3 +1,4 @@
 run:
-	./list.py -n 900
+	#./list.py -n 900
+	./explore.py
 

@@ -1,4 +1,4 @@
 Installation
 ============
 
-    pip install pygithub
+    pip3 install progress requests
