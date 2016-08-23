@@ -3,7 +3,7 @@
 import argparse
 import time
 
-import common
+import query
 
 
 def format_duration(secs):
@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser('print current rate limit')
     parser.parse_args()
 
-    _, data = common.query('/rate_limit')
+    _, data = query.query('/rate_limit')
     now = time.time()
 
     for key, resource in sorted(data['resources'].items()):
