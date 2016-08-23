@@ -1,15 +1,25 @@
-import json
+import os.path
 
-from github import Github  # if this fails:  pip3 install pygithub
+import github  # if this fails:  pip3 install pygithub
+
+
+import utils
 
 
 def read_config():
 	config_fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
-	with open(config_fn) as config_f:
-		return json.load(config_fn)
+	return utils.read_json(config_fn)
 
 
 def connect():
 	config = read_config()
-	g = Github(config['user'], config['password'])
+	g = github.Github(config['user'], config['password'])
+	return config, g
 
+
+def pluck_val(v):
+	if isinstance(v, github.GithubObject._NotSetType):
+		return None
+	if isinstance(v, github.GithubObject._ValuedAttribute):
+		return v.value
+	return v
