@@ -12,7 +12,10 @@ def explore(repo_dict):
     forks_url = '/repos/%s/forks?per_page=100' % repo_dict['full_name']
     forks = utils.progress_list(
         query.paged(forks_url), repo_dict['forks_count'])
-    print(len(forks))
+    utils.write_data('forks/%s' % utils.safe_name(repo_dict['full_name']))
+    for f in forks:
+        if f['forks_count'] > 0:
+            explore(f)
 
 
 def main():

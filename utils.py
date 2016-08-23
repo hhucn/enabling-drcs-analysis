@@ -63,3 +63,10 @@ _config = _read_config()
 
 def read_config():
     return _config
+
+
+def safe_filename(n):
+    res = re.sub(r'[^a-zA-Z0-9_-]+', '___', n)
+    assert re.match(r'^[a-zA-Z0-9_-]+$', res), \
+        ('%r is not a safe filename' % res)
+    return res

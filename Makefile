@@ -2,7 +2,8 @@ run:
 	#./list.py -n 900
 	./explore.py
 
-test: lint
+test:
+	nosetests3 .
 
 lint:
 	flake8 .

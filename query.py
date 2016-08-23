@@ -33,8 +33,8 @@ def paged(path, params=None, limit=None, get_items=None):
     yielded = 0
     while True:
         r, data = query(path, params)
-        link = r.headers['Link']
         items = get_items(data) if get_items else data
+        link = r.headers.get('Link', '')
         m = re.search('<https://api\.github\.com([^>]+)>;\s*rel="next"', link)
         if limit is not None:
             if yielded + len(items) >= limit:
