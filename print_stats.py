@@ -11,7 +11,7 @@ def main():
 
 	repo_list = utils.read_data('list')
 	for r in repo_list:
-		print('%40s - %d forks' % (r['html_url'], r['forks_count']))
+		print('%-80s - %d forks' % (r['html_url'], r['forks_count']))
 
 
 if __name__ == '__main__':

@@ -22,9 +22,14 @@ def main():
 	parser = argparse.ArgumentParser('find the whole network of repos')
 	args = parser.parse_args()
 
+	config = utils.read_config()
+	ignored_repos = set(config.get('ignored_repos', []))
+
 	initials = utils.read_data('list')
 	networks = []
 	for irepo in initials:
+		if irepo['full_name'] in ignored_repos:
+			continue
 		networks.append(explore(irepo))
 
 if __name__ == '__main__':

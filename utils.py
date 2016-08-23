@@ -44,12 +44,6 @@ def write_data(basename, data):
 	write_json(fn, data)
 
 
-def parse_repo_name(url):
-	m = re.match('^https://api.github.com/repos/([^/]+)/([^/]+)', url)
-	assert m
-	return (m.group(1), m.group(2))
-
-
 def progress_list(generator, count=None):
 	pb = progress.bar.Bar(max=count) if count else progress.spinner.Spinner()
 	return list(pb.iter(generator))
