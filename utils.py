@@ -40,7 +40,7 @@ def read_data(basename, dirname=None):
 
 
 def calc_filename(basename, dirname=None):
-    if not re.match(r'^[a-z0-9A-Z_-]+$', basename):
+    if not re.match(r'^[.a-z0-9A-Z_-]+$', basename):
         raise Exception('Invalid basename %r' % basename)
 
     if dirname:
