@@ -18,7 +18,7 @@ def fetch_prs(repo_dict, verbose):
     else:
         if verbose:
             print('PRs of %s ...' % repo_dict['html_url'])
-        pulls_url = repo_dict['pulls_url'].replace('{/number}', '') + '?state=all'
+        pulls_url = repo_dict['pulls_url'].replace('{/number}', '') + '?state=all&per_page=100'
 
         q = query.paged(pulls_url)
         if verbose:
