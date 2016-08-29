@@ -9,13 +9,18 @@ import utils
 
 
 def build_url(path, params=None):
-    assert path.startswith('/')
+    if path.startswith('/'):
+        base = 'https://api.github.com' + path
+    else:
+        base = path
+    assert base.startswith('https://api.github.com')
+
     config = utils.read_config()
     params = {} if params is None else params.copy()
     params['client_id'] = config['client_id']
     params['client_secret'] = config['client_secret']
     q = ('&' if ('?' in path) else '?') + urllib.parse.urlencode(params)
-    url = 'https://api.github.com' + path + q
+    url = base + q
     return url
 
 
