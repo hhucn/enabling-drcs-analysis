@@ -1,3 +1,2 @@
-config.json
-config_s.json
+config*.json
 data
