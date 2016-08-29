@@ -4,6 +4,7 @@ Installation
 Install
 
 * python3
+* python3-pip
 * git
 
 and run `make deps`.
