@@ -8,26 +8,24 @@ import utils
 import query
 
 
+DIRNAME = 'pulls/'
+
+
 def fetch_prs(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    if utils.data_exists(basename, dirname='prs/'):
+    if utils.data_exists(basename, DIRNAME):
         return
     else:
         if verbose:
             print('PRs of %s ...' % repo_dict['html_url'])
         pulls_url = repo_dict['pulls_url'].replace('{/number}', '') + '?state=all'
-        if 'youtube-dl' not in repo_dict['name']:
-            return
-        print(pulls_url)
-        print(list(query.paged(pulls_url)))
-        return
 
-        forks_query = query.paged(forks_url)
+        q = query.paged(pulls_url)
         if verbose:
-            forks = utils.progress_list(forks_query, repo_dict['forks_count'])
+            pulls = utils.progress_list(q)
         else:
-            forks = list(forks_query)
-        utils.write_data(basename, forks, dirname='prs/')
+            pulls = list(q)
+        utils.write_data(basename, pulls, DIRNAME)
 
 
 def main():
@@ -38,7 +36,7 @@ def main():
     config = utils.read_config()
     ignored_repos = set(config.get('ignored_repos', []))
 
-    utils.ensure_datadir('prs/')
+    utils.ensure_datadir(DIRNAME)
 
     initials = utils.read_data('list')
     if not args.verbose:
