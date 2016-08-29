@@ -14,8 +14,9 @@ def read_json(fn):
 
 
 def write_json(fn, data):
-    with open(fn, 'w') as f:
+    with open(fn + '.tmp', 'w') as f:
         json.dump(data, f, indent='\t')
+    os.rename(fn + '.tmp', fn)
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -59,11 +60,6 @@ def write_data(basename, data, dirname=None):
 
 
 def progress_list(generator, count=None):
-    if count is None:
-        try:
-            count = len(generator)
-        except TypeError:
-            pass
     pb = progress.bar.Bar(max=count) if count else progress.spinner.Spinner()
     return list(pb.iter(generator))
 
