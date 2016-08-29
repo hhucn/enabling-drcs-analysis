@@ -1,4 +1,9 @@
 Installation
 ============
 
-    pip3 install progress requests
+Install
+
+* python3
+* git
+
+and run `make deps`.
