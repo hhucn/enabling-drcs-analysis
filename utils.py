@@ -33,8 +33,8 @@ def ensure_datadir(subname):
     ensure_dir(os.path.join(DATA_DIR, subname))
 
 
-def read_data(basename):
-    fn = os.path.join(DATA_DIR, basename + '.json')
+def read_data(basename, dirname=None):
+    fn = calc_filename(basename, dirname)
     return read_json(fn)
 
 

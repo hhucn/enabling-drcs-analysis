@@ -9,14 +9,14 @@ import query
 def explore(repo_dict, indent=0):
     basename = utils.safe_filename(repo_dict['full_name'])
     if utils.data_exists(basename, dirname='forks/'):
-        return
-
-    print('%sForks of %s ...' % ('.' * indent, repo_dict['html_url']))
-    utils.ensure_datadir('forks/')
-    forks_url = '/repos/%s/forks?per_page=100' % repo_dict['full_name']
-    forks = utils.progress_list(
-        query.paged(forks_url), repo_dict['forks_count'])
-    utils.write_data(basename, forks, dirname='forks/')
+        forks = utils.read_data(basename, dirname='forks/')
+    else:
+        print('%sForks of %s ...' % ('.' * indent, repo_dict['html_url']))
+        utils.ensure_datadir('forks/')
+        forks_url = '/repos/%s/forks?per_page=100' % repo_dict['full_name']
+        forks = utils.progress_list(
+            query.paged(forks_url), repo_dict['forks_count'])
+        utils.write_data(basename, forks, dirname='forks/')
     for f in forks:
         if f['forks_count'] > 0:
             explore(f, indent + 1)
