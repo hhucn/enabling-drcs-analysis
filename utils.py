@@ -23,7 +23,7 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 def ensure_dir(dn):
     try:
-        os.mkdir(DATA_DIR)
+        os.mkdir(dn)
     except OSError as ose:
         if ose.errno != errno.EEXIST:
             raise ose
@@ -38,13 +38,24 @@ def read_data(basename):
     return read_json(fn)
 
 
-def write_data(basename, data):
+def calc_filename(basename, dirname=None):
     if not re.match(r'^[a-z0-9A-Z_-]+$', basename):
         raise Exception('Invalid basename %r' % basename)
+
+    if dirname:
+        return os.path.join(DATA_DIR, dirname, basename + '.json')
+    else:
+        return os.path.join(DATA_DIR, basename + '.json')
+
+
+def data_exists(basename, dirname=None):
+    return os.path.exists(calc_filename(basename, dirname))
+
+
+def write_data(basename, data, dirname=None):
     ensure_dir(DATA_DIR)
 
-    fn = os.path.join(DATA_DIR, basename + '.json')
-    write_json(fn, data)
+    write_json(calc_filename(basename, dirname), data)
 
 
 def progress_list(generator, count=None):
