@@ -17,9 +17,11 @@ def explore(repo_dict, verbose, indent=0):
             print('%sForks of %s ...' % ('.' * indent, repo_dict['html_url']))
         utils.ensure_datadir('forks/')
         forks_url = '/repos/%s/forks?per_page=100' % repo_dict['full_name']
-        forks = query.paged(forks_url)
+        forks_query = query.paged(forks_url)
         if verbose:
-            forks = utils.progress_list(forks, repo_dict['forks_count'])
+            forks = utils.progress_list(forks_query, repo_dict['forks_count'])
+        else:
+            forks = list(forks_query)
         utils.write_data(basename, forks, dirname='forks/')
     for f in forks:
         if f['forks_count'] > 0:
