@@ -59,6 +59,11 @@ def write_data(basename, data, dirname=None):
 
 
 def progress_list(generator, count=None):
+    if count is None:
+        try:
+            count = len(generator)
+        except TypeError:
+            pass
     pb = progress.bar.Bar(max=count) if count else progress.spinner.Spinner()
     return list(pb.iter(generator))
 
