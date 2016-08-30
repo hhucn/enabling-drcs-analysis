@@ -15,17 +15,17 @@ def fetch_prs(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
     if utils.data_exists(basename, DIRNAME):
         return
-    else:
-        if verbose:
-            print('PRs of %s ...' % repo_dict['html_url'])
-        pulls_url = repo_dict['pulls_url'].replace('{/number}', '') + '?state=all&per_page=100'
 
-        q = query.paged(pulls_url)
-        if verbose:
-            pulls = utils.progress_list(q)
-        else:
-            pulls = list(q)
-        utils.write_data(basename, pulls, DIRNAME)
+    if verbose:
+        print('PRs of %s ...' % repo_dict['html_url'])
+    pulls_url = repo_dict['pulls_url'].replace('{/number}', '') + '?state=all&per_page=100'
+
+    q = query.paged(pulls_url)
+    if verbose:
+        pulls = utils.progress_list(q)
+    else:
+        pulls = list(q)
+    utils.write_data(basename, pulls, DIRNAME)
 
 
 def main():
