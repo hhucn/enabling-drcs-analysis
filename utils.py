@@ -39,14 +39,14 @@ def read_data(basename, dirname=None):
     return read_json(fn)
 
 
-def calc_filename(basename, dirname=None):
+def calc_filename(basename, dirname=None, suffix='.json'):
     if not re.match(r'^[.a-z0-9A-Z_-]+$', basename):
         raise Exception('Invalid basename %r' % basename)
 
     if dirname:
-        return os.path.join(DATA_DIR, dirname, basename + '.json')
+        return os.path.join(DATA_DIR, dirname, basename + suffix)
     else:
-        return os.path.join(DATA_DIR, basename + '.json')
+        return os.path.join(DATA_DIR, basename + suffix)
 
 
 def data_exists(basename, dirname=None):

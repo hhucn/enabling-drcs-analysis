@@ -16,19 +16,16 @@ DIRNAME = 'repos/'
 
 def download(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    path = utils.calc_filename(basename, dirname=DIRNAME)
+    path = utils.calc_filename(basename, dirname=DIRNAME, suffix='')
     if os.path.exists(path):
         return
 
-    tmp_path = path + '.tmp'
-
-    #pulls = utils.read_data(basename, dirname='pulls/')
-    #print(pulls[0].keys())
-
     if verbose:
         print('Downloading %s ...' % repo_dict['html_url'])
-    git.Repo.clone_from(repo_dict['git_url'], tmp_path)
 
+    tmp_path = path + '.tmp'
+    git.Repo.clone_from(repo_dict['git_url'], tmp_path, bare=True)
+    os.rename(tmp_path, path)
 
 
 def main():
