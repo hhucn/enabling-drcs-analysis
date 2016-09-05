@@ -107,6 +107,8 @@ def iter_repos(parser, dirname, func):
 
     ensure_datadir(dirname)
 
+    args.config = config
+
     def _should_visit(repo_dict):
         if repo_dict['full_name'] in ignored_repos:
             return False

@@ -18,6 +18,20 @@ import gen_commit_list
 DIRNAME = 'sim_picks'
 
 
+def pick(config, repo):
+    commit_list = utils.read_data(basename, gen_commit_list.DIRNAME)
+
+    # Determine sensible times
+    first_idx = round(config['cutoff'] * len(commit_list))
+    first_time = commit_list[first_idx]['timestamp']
+    last_time = commit_list[last_idx]['timestamp']
+
+    rng = random.Random(0)
+    for _ in range(config['experiments_per_repo']):
+        ts = rng.randint(first_time, last_time)
+        
+
+
 def sim_pick(args, repo_dict):
     basename = utils.safe_filename(repo_dict['full_name'])
 
@@ -25,9 +39,10 @@ def sim_pick(args, repo_dict):
         print('No commit list for %s' % repo_dict['full_name'])
         return
 
-    rng = random.Random(0)
-    for _ in range(args.n):
-        pass  # TODO call the rng
+    path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
+    repo = git.repo.Repo(path)
+
+    pick(args.config, repo)
 
     # TODO get start and end time
     # TODO cut a little bit from both (if possible)
@@ -36,9 +51,6 @@ def sim_pick(args, repo_dict):
 def main():
     parser = argparse.ArgumentParser(
         'Pick random times and commits for experiments')
-    parser.add_argument(
-        '-n', type=int, metavar='COUNT',
-        help='Number of experiments per repository')
     utils.iter_repos(parser, DIRNAME, sim_pick)
 
 if __name__ == '__main__':

@@ -26,7 +26,14 @@ def gen_commit_list(args, repo_dict):
     if args.verbose:
         print('Extracting commit list from %s' % (repo_dict['full_name']))
 
-    commits = {c.hexsha: c.committed_date for c in repo.iter_commits()}
+    def _collect_commit(c):
+        return {
+            'parents': tuple(p.hexsha for p in c.parents),
+            'sha': c.hexsha,
+            'ts': c.committed_date,
+        }
+
+    commits = {c.hexsha: _collect_commit(c) for c in repo.iter_commits()}
     separate_branches = set()
     for b in repo.branches:
         any_common = False
@@ -39,7 +46,7 @@ def gen_commit_list(args, repo_dict):
                 continue
             if c.hexsha in branch_commits:
                 continue
-            branch_commits[c.hexsha] = c.committed_date
+            branch_commits[c.hexsha] = _collect_commit(c)
             to_visit.extend(c.parents)
 
         if any_common:
@@ -49,11 +56,7 @@ def gen_commit_list(args, repo_dict):
                 repo_dict['full_name'], b.name, len(branch_commits)))
             separate_branches.add(b.name)
 
-    commit_items = sorted(commits.items(), key=lambda t: (t[1], t[0]))
-    commit_list = [{
-        'sha': sha,
-        'ts': ts
-    } for sha, ts in commit_items]
+    commit_list = sorted(commits.values(), key=lambda cd: (cd['ts'], cd['sha']))
     data = {
         'commit_list': commit_list,
         'separate_branches': sorted(separate_branches),
