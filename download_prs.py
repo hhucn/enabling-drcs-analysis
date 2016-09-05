@@ -57,7 +57,7 @@ def download_prs(repo_dict, verbose):
     if verbose and failures:
         print('They were %d failures for %s: %r' % (
             len(failures), basename,
-            [branch_name(f['pr']) for f in failures]))
+            [branch_name(f['pull']) for f in failures]))
 
 
 def main():
