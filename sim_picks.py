@@ -29,7 +29,7 @@ def pick(config, repo):
     rng = random.Random(0)
     for _ in range(config['experiments_per_repo']):
         ts = rng.randint(first_time, last_time)
-        
+        comparison_ts = ts + 24 * 60 * 60 * config['master_comparison_future_days']
 
 
 def sim_pick(args, repo_dict):
