@@ -40,7 +40,7 @@ def main():
 
     initials = utils.read_data('list')
     if not args.verbose:
-        initials = progress.bar.Bar('Downloading PRs').iter(initials)
+        initials = progress.bar.Bar('Listing PRs').iter(initials)
     for irepo in initials:
         if irepo['full_name'] in ignored_repos:
             continue

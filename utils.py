@@ -82,3 +82,17 @@ def safe_filename(n):
     assert re.match(r'^[.a-zA-Z0-9_-]+$', res), \
         ('%r is not a safe filename' % res)
     return res
+
+
+def iter_repos(args, msg, func):
+    config = read_config()
+    ignored_repos = set(config.get('ignored_repos', []))
+
+    initials = read_data('list')
+    if not args.verbose:
+        initials = progress.bar.Bar(msg).iter(initials)
+    for irepo in initials:
+        if irepo['full_name'] in ignored_repos:
+            continue
+        func(irepo, args.verbose)
+
