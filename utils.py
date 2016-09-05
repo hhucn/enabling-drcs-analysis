@@ -90,7 +90,7 @@ def iter_repos(parser, dirname, func):
         '-v', '--verbose',
         action='store_true', help='Show detailed status')
     parser.add_argument(
-        '-q', '--no-status',
+        '-q', '--no-status', dest='no_status',
         action='store_true', help='Do not show progress bars')
     parser.add_argument(
         '-f', '--filter',

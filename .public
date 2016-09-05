@@ -1,9 +1,12 @@
+download_prs.py
 download.py
 explore.py
-fetch_prs.py
+gen_commit_lists.py
+list_prs.py
 list.py
 print_rate_limit.py
 print_stats.py
+sim_picks.py
 query.py
 utils.py
 Makefile
