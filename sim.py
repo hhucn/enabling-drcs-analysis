@@ -17,7 +17,14 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
+def eval_diff(diff):
+    return {
+        'len': len(diff),
+    }
+
+
 def pick(args, basename, repo):
+    sim_config = args.config['sim']
     utils.ensure_datadir(TMP_REPOS)
 
     commit_list_data = utils.read_data(basename, gen_commit_lists.DIRNAME)
@@ -31,19 +38,24 @@ def pick(args, basename, repo):
         return c
 
     # Determine sensible times
-    first_idx = round(args.config['cutoff_commits_first'] * len(commit_list))
+    first_idx = round(sim_config['cutoff_commits_first'] * len(commit_list))
     first_time = commit_list[first_idx]['ts']
-    last_idx = round(args.config['cutoff_commits_last'] * len(commit_list))
+    last_idx = round(sim_config['cutoff_commits_last'] * len(commit_list))
     last_time = commit_list[last_idx]['ts']
 
     rng = random.Random(0)
     now = time.time()
-    for i in range(args.config['experiments_per_repo']):
+    experiments = []
+    for i in range(sim_config['experiments_per_repo']):
         ts = rng.randint(first_time, last_time)
-        master_commit = find_master_commit(ts)
+
+        master_sha = find_master_commit(ts)['sha']
+        master_commit = repo.commit(master_sha)
+
         future_ts = (
-            ts + 24 * 60 * 60 * args.config['master_comparison_future_days'])
-        future_commit = find_master_commit(future_ts)
+            ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
+        future_sha = find_master_commit(future_ts)['sha']
+        future_commit = repo.commit(future_sha)
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
         tmp_repo_path = utils.calc_filename(
@@ -57,8 +69,28 @@ def pick(args, basename, repo):
             if not args.keep:
                 shutil.rmtree(tmp_repo_path)
 
-        # TODO calculate diff
-        # TODO find one or more challengers
+        res = {}
+
+        res['master'] = eval_diff(future_commit.diff(master_commit))
+
+        # TODO find one or more challengers and calculate their diffs
+
+        experiment = {
+            'i': i,
+            'ts': ts,
+            'master_sha': master_sha,
+            'future_ts': future_ts,
+            'future_sha': future_sha,
+            'res': res,
+        }
+        import json
+        print(json.dumps(experiment, indent=2))
+        experiments.append(experiment)
+
+    utils.write_data(basename, dirname=DIRNAME, data={
+        'config': sim_config,
+        'experiments': experiments,
+    })
 
 
 def sim_pick(args, repo_dict):
