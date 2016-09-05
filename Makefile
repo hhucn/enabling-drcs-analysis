@@ -3,7 +3,8 @@ run:
 	#./explore.py
 	#./list_prs.py
 	#./download.py
-	./download_prs.py
+	#./download_prs.py
+	./gen_commit_lists.py -q
 
 deps:
 	pip3 install progress requests gitpython
