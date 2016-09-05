@@ -3,6 +3,7 @@ import itertools
 import json
 import os.path
 import re
+import time
 
 
 import progress.bar  # if this fails: pip3 install progress
@@ -138,3 +139,7 @@ def chunks(l, n):
         if not lst:
             break
         yield lst
+
+
+def timestr(ts):
+    return time.strftime('%Y%m%d_%H%M%S', time.localtime(ts))
