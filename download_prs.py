@@ -2,6 +2,7 @@
 
 import argparse
 import os.path
+import time
 
 import progress
 import git
@@ -14,16 +15,14 @@ import list_prs
 
 
 CANARY_DIRNAME = 'downloaded_prs'
-DIRNAME = download.DIRNAME
 
 
 def download_prs(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    canary_path = utils.calc_filename(basename, dirname=CANARY_DIRNAME, suffix='')
-    if os.path.exists(canary_path):
+    if utils.data_exists(basename, CANARY_DIRNAME):
         return
 
-    path = utils.calc_filename(basename, dirname=DIRNAME, suffix='')
+    path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
     origin = repo.remotes.origin
     prs = utils.read_data(basename, list_prs.DIRNAME)
@@ -31,12 +30,12 @@ def download_prs(repo_dict, verbose):
     if verbose:
         print('Fetching %d PRs from %s' % (len(prs), repo_dict['full_name']))
 
-    branch_names = ['pull/%d/head' % pr['number'] for pr in prs]
+    branch_names = ['pull/%d/head:gha_pr_%d' % (pr['number'], pr['number']) for pr in prs]
     origin.fetch(branch_names)
 
-    print('fetched! %s' % path)
-
-    # TODO write canary once we're done
+    utils.write_data(basename, dirname=CANARY_DIRNAME, data={
+        'timestamp': time.time(),
+    })
 
 
 def main():
@@ -44,7 +43,7 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
     args = parser.parse_args()
 
-    utils.ensure_datadir(DIRNAME)
+    utils.ensure_datadir(CANARY_DIRNAME)
 
     utils.iter_repos(args, 'Downloading PRs', download_prs)
 
