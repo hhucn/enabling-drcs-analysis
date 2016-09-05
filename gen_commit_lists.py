@@ -17,7 +17,8 @@ def gen_commit_list(args, repo_dict):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, download_prs.DIRNAME):
-        print('Not all PRs downloaded for %s' % repo_dict['full_name'])
+        if args.verbose or args.no_status:
+            print('Not all PRs downloaded for %s' % repo_dict['full_name'])
         return
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')

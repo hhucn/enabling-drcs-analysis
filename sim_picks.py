@@ -19,7 +19,16 @@ DIRNAME = 'sim_picks'
 
 
 def pick(config, repo):
-    commit_list = utils.read_data(basename, gen_commit_list.DIRNAME)
+    commit_list_data = utils.read_data(basename, gen_commit_list.DIRNAME)
+    commit_dict = {c['sha']: c for c in commit_list_data['commit_list']}
+
+    def find_master_commit(ts):
+        c = commit_dict[commit_list_data]
+        while c['ts'] > ts:
+            c = c['parents'][0]
+
+        return c
+
 
     # Determine sensible times
     first_idx = round(config['cutoff'] * len(commit_list))
@@ -29,7 +38,8 @@ def pick(config, repo):
     rng = random.Random(0)
     for _ in range(config['experiments_per_repo']):
         ts = rng.randint(first_time, last_time)
-        comparison_ts = ts + 24 * 60 * 60 * config['master_comparison_future_days']
+        future_ts = ts + 24 * 60 * 60 * config['master_comparison_future_days']
+        future_commit = find_master_commit(ts)
 
 
 def sim_pick(args, repo_dict):
