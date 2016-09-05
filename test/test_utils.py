@@ -11,3 +11,13 @@ class UtilsTest(unittest.TestCase):
         import utils
 
         self.assertEqual(utils.safe_filename('foo2/bar5-_'), 'foo2___bar5-_')
+
+    def test_chunks(self):
+        import utils
+
+        self.assertEqual(list(utils.chunks('abcdefg', 2)), [
+            ['a', 'b'],
+            ['c', 'd'],
+            ['e', 'f'],
+            ['g'],
+        ])

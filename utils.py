@@ -1,4 +1,5 @@
 import errno
+import itertools
 import json
 import os.path
 import re
@@ -96,3 +97,11 @@ def iter_repos(args, msg, func):
             continue
         func(irepo, args.verbose)
 
+
+def chunks(l, n):
+    it = iter(l)
+    while True:
+        lst = list(itertools.islice(it, n))
+        if not lst:
+            break
+        yield lst
