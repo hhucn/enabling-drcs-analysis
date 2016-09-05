@@ -85,12 +85,16 @@ def safe_filename(n):
     return res
 
 
-def iter_repos(args, msg, func):
+def iter_repos(parser, msg, func):
+    parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
+    parser.add_argument('-q', '--no-status', action='store_true', help='Do not show progress bars')
+    args = parser.parse_args()
+
     config = read_config()
     ignored_repos = set(config.get('ignored_repos', []))
 
     initials = read_data('list')
-    if not args.verbose:
+    if not args.verbose and not args.no_status:
         initials = progress.bar.Bar(msg).iter(initials)
     for irepo in initials:
         if irepo['full_name'] in ignored_repos:

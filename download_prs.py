@@ -14,7 +14,7 @@ import list_prs
 
 
 
-CANARY_DIRNAME = 'downloaded_prs'
+DIRNAME = 'downloaded_prs'
 
 
 def branch_name(pr):
@@ -23,7 +23,7 @@ def branch_name(pr):
 
 def download_prs(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    if utils.data_exists(basename, CANARY_DIRNAME):
+    if utils.data_exists(basename, DIRNAME):
         return
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
@@ -49,7 +49,7 @@ def download_prs(repo_dict, verbose):
                         'msg': gce.stderr.decode(),
                     })
 
-    utils.write_data(basename, dirname=CANARY_DIRNAME, data={
+    utils.write_data(basename, dirname=DIRNAME, data={
         'timestamp': time.time(),
         'failures': failures,
     })
@@ -61,13 +61,9 @@ def download_prs(repo_dict, verbose):
 
 
 def main():
+    utils.ensure_datadir(DIRNAME)
     parser = argparse.ArgumentParser('Download pull requests')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
-    args = parser.parse_args()
-
-    utils.ensure_datadir(CANARY_DIRNAME)
-
-    utils.iter_repos(args, 'Downloading PRs', download_prs)
+    utils.iter_repos(parser, 'Downloading PRs', download_prs)
 
 if __name__ == '__main__':
     main()
