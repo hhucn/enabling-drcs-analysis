@@ -143,3 +143,7 @@ def chunks(l, n):
 
 def timestr(ts):
     return time.strftime('%Y%m%d_%H%M%S', time.localtime(ts))
+
+
+def evince(obj):
+    print(json.dumps(obj, indent=2))

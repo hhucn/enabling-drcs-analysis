@@ -50,30 +50,30 @@ def pick(args, basename, repo):
         ts = rng.randint(first_time, last_time)
 
         master_sha = find_master_commit(ts)['sha']
-        master_commit = repo.commit(master_sha)
 
         future_ts = (
             ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
         future_sha = find_master_commit(future_ts)['sha']
-        future_commit = repo.commit(future_sha)
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
         tmp_repo_path = utils.calc_filename(
             basename, dirname=TMP_REPOS, suffix=suffix)
         assert basename in tmp_repo_path
 
+        res = {}
         try:
             repo.clone(tmp_repo_path)
             tmp_repo = git.repo.Repo(tmp_repo_path)
+
+            master_commit = tmp_repo.commit(master_sha)
+            future_commit = tmp_repo.commit(future_sha)
+
+            # TODO find one or more challengers and calculate their diffs
+
+            res['master'] = eval_diff(future_commit.diff(master_commit))
         finally:
             if not args.keep:
                 shutil.rmtree(tmp_repo_path)
-
-        res = {}
-
-        res['master'] = eval_diff(future_commit.diff(master_commit))
-
-        # TODO find one or more challengers and calculate their diffs
 
         experiment = {
             'i': i,
@@ -83,8 +83,7 @@ def pick(args, basename, repo):
             'future_sha': future_sha,
             'res': res,
         }
-        import json
-        print(json.dumps(experiment, indent=2))
+        utils.evince(experiment)
         experiments.append(experiment)
 
     utils.write_data(basename, dirname=DIRNAME, data={
