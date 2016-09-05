@@ -88,6 +88,8 @@ def safe_filename(n):
 def iter_repos(parser, dirname, func):
     parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
     parser.add_argument('-q', '--no-status', action='store_true', help='Do not show progress bars')
+    parser.add_argument('-f', '--filter', metavar='REGEXP', type=re.compile, help='Filter by repository fullname (regular expressions)')
+    parser.add_argument('-r', '--redo', action='store_true', help='Do this action even if it is marked complete for the repository')
     args = parser.parse_args()
 
     config = read_config()
@@ -95,18 +97,26 @@ def iter_repos(parser, dirname, func):
 
     ensure_datadir(dirname)
 
-    initial_repos = read_data('list')
+
+    def _should_visit(repo_dict):
+        if repo_dict['full_name'] in ignored_repos:
+            return False
+
+        if args.filter and not args.filter.search(repo_dict['full_name']):
+            return False
+
+        if not args.redo:
+            basename = safe_filename(repo_dict['full_name'])
+            if data_exists(basename, dirname):
+                return False
+
+        return True
+
+    initial_repos = list(filter(_should_visit, read_data('list')))
     if not args.verbose and not args.no_status:
         msg = dirname.rstrip('/')
         initial_repos = progress.bar.Bar(msg).iter(initial_repos)
     for repo_dict in initial_repos:
-        if repo_dict['full_name'] in ignored_repos:
-            continue
-
-        basename = safe_filename(repo_dict['full_name'])
-        if data_exists(basename, dirname):
-            continue
-
         func(repo_dict, args.verbose)
 
 
