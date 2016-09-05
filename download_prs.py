@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import os.path
 import time
 
 import progress
@@ -9,9 +8,7 @@ import git
 
 import download
 import utils
-import query
 import list_prs
-
 
 
 DIRNAME = 'download_prs'
@@ -21,7 +18,7 @@ def branch_name(pr):
     return 'pull/%d/head:gha_pr_%d' % (pr['number'], pr['number'])
 
 
-def download_prs(repo_dict, verbose):
+def download_prs(args, repo_dict):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
@@ -29,7 +26,7 @@ def download_prs(repo_dict, verbose):
     origin = repo.remotes.origin
     prs = utils.read_data(basename, list_prs.DIRNAME)
 
-    if verbose:
+    if args.verbose:
         print('Fetching %d PRs from %s' % (len(prs), repo_dict['full_name']))
         prs = progress.bar.Bar(max=len(prs)).iter(prs)
 
@@ -52,7 +49,7 @@ def download_prs(repo_dict, verbose):
         'failures': failures,
     })
 
-    if verbose and failures:
+    if (args.verbose or args.quiet) and failures:
         print('They were %d failures for %s: %r' % (
             len(failures), basename,
             [branch_name(f['pull']) for f in failures]))

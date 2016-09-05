@@ -86,17 +86,26 @@ def safe_filename(n):
 
 
 def iter_repos(parser, dirname, func):
-    parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
-    parser.add_argument('-q', '--no-status', action='store_true', help='Do not show progress bars')
-    parser.add_argument('-f', '--filter', metavar='REGEXP', type=re.compile, help='Filter by repository fullname (regular expressions)')
-    parser.add_argument('-r', '--redo', action='store_true', help='Do this action even if it is marked complete for the repository')
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true', help='Show detailed status')
+    parser.add_argument(
+        '-q', '--no-status',
+        action='store_true', help='Do not show progress bars')
+    parser.add_argument(
+        '-f', '--filter',
+        metavar='REGEXP', type=re.compile,
+        help='Filter by repository fullname (regular expressions)')
+    parser.add_argument(
+        '-r', '--redo',
+        action='store_true',
+        help='Do this action even if it is marked complete for the repository')
     args = parser.parse_args()
 
     config = read_config()
     ignored_repos = set(config.get('ignored_repos', []))
 
     ensure_datadir(dirname)
-
 
     def _should_visit(repo_dict):
         if repo_dict['full_name'] in ignored_repos:
@@ -117,7 +126,7 @@ def iter_repos(parser, dirname, func):
         msg = dirname.rstrip('/')
         initial_repos = progress.bar.Bar(msg).iter(initial_repos)
     for repo_dict in initial_repos:
-        func(repo_dict, args.verbose)
+        func(args, repo_dict)
 
 
 def chunks(l, n):

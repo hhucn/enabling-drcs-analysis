@@ -2,23 +2,18 @@
 
 import argparse
 import collections
-import os.path
-import time
 
-import progress
 import git
 
 import download
 import utils
-import query
-import list_prs
 import download_prs
 
 
 DIRNAME = 'commit_list'
 
 
-def gen_commit_list(repo_dict, verbose):
+def gen_commit_list(args, repo_dict):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, download_prs.DIRNAME):
@@ -27,10 +22,8 @@ def gen_commit_list(repo_dict, verbose):
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
-    origin = repo.remotes.origin
-    prs = utils.read_data(basename, list_prs.DIRNAME)
 
-    if verbose:
+    if args.verbose:
         print('Extracting commit list from %s' % (repo_dict['full_name']))
 
     commits = {c.hexsha: c.committed_date for c in repo.iter_commits()}
@@ -68,9 +61,9 @@ def gen_commit_list(repo_dict, verbose):
     utils.write_data(basename, dirname=DIRNAME, data=data)
 
 
-
 def main():
-    parser = argparse.ArgumentParser('Generate a list of all commits in a repository')
+    parser = argparse.ArgumentParser(
+        'Generate a list of all commits in a repository')
     utils.iter_repos(parser, DIRNAME, gen_commit_list)
 
 if __name__ == '__main__':

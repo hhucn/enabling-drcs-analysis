@@ -2,8 +2,6 @@
 
 import argparse
 
-import progress
-
 import utils
 import query
 
@@ -11,15 +9,17 @@ import query
 DIRNAME = 'pulls/'
 
 
-def list_prs(repo_dict, verbose):
+def list_prs(args, repo_dict):
     basename = utils.safe_filename(repo_dict['full_name'])
 
-    if verbose:
+    if args.verbose:
         print('PRs of %s ...' % repo_dict['html_url'])
-    pulls_url = repo_dict['pulls_url'].replace('{/number}', '') + '?state=all&per_page=100'
+    pulls_url = (
+        repo_dict['pulls_url'].replace('{/number}', '') +
+        '?state=all&per_page=100')
 
     q = query.paged(pulls_url)
-    if verbose:
+    if args.verbose:
         pulls = utils.progress_list(q)
     else:
         pulls = list(q)
