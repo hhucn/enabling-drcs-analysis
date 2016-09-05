@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
-import collections
-import os.path
 import random
 import time
 
-import progress
+import shutil
+
 import git
 
 import download
 import utils
-import query
-import list_prs
 import gen_commit_lists
 
 
@@ -20,7 +17,7 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
-def pick(config, basename, repo):
+def pick(args, basename, repo):
     utils.ensure_datadir(TMP_REPOS)
 
     commit_list_data = utils.read_data(basename, gen_commit_lists.DIRNAME)
@@ -34,28 +31,33 @@ def pick(config, basename, repo):
         return c
 
     # Determine sensible times
-    first_idx = round(config['cutoff_commits_first'] * len(commit_list))
+    first_idx = round(args.config['cutoff_commits_first'] * len(commit_list))
     first_time = commit_list[first_idx]['ts']
-    last_idx = round(config['cutoff_commits_last'] * len(commit_list))
+    last_idx = round(args.config['cutoff_commits_last'] * len(commit_list))
     last_time = commit_list[last_idx]['ts']
 
     rng = random.Random(0)
     now = time.time()
-    for i in range(config['experiments_per_repo']):
+    for i in range(args.config['experiments_per_repo']):
         ts = rng.randint(first_time, last_time)
-        commit = find_master_commit(ts)
-        future_ts = ts + 24 * 60 * 60 * config['master_comparison_future_days']
+        master_commit = find_master_commit(ts)
+        future_ts = (
+            ts + 24 * 60 * 60 * args.config['master_comparison_future_days'])
         future_commit = find_master_commit(future_ts)
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
-        tmp_repo_fn = utils.calc_filename(basename, dirname=TMP_REPOS, suffix=suffix)
-        print(tmp_repo_fn)
+        tmp_repo_path = utils.calc_filename(
+            basename, dirname=TMP_REPOS, suffix=suffix)
+        assert basename in tmp_repo_path
+
+        try:
+            repo.clone(tmp_repo_path)
+            tmp_repo = git.repo.Repo(tmp_repo_path)
+        finally:
+            if not args.keep:
+                shutil.rmtree(tmp_repo_path)
 
         # TODO calculate diff
-
-        # TODO determine tmp repo path
-        # TODO check out into a repo where we can play around
-
         # TODO find one or more challengers
 
 
@@ -70,15 +72,16 @@ def sim_pick(args, repo_dict):
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
 
-    pick(args.config, basename, repo)
-
-    # TODO get start and end time
-    # TODO cut a little bit from both (if possible)
+    pick(args, basename, repo)
 
 
 def main():
     parser = argparse.ArgumentParser(
         'Pick random times and commits for experiments')
+    parser.add_argument(
+        '-k', '--keep', action='store_true',
+        help='Keep temporary repositories'
+    )
     utils.iter_repos(parser, DIRNAME, sim_pick)
 
 if __name__ == '__main__':

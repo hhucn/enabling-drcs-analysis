@@ -57,7 +57,9 @@ def gen_commit_list(args, repo_dict):
                 repo_dict['full_name'], b.name, len(branch_commits)))
             separate_branches.add(b.name)
 
-    commit_list = sorted(commits.values(), key=lambda cd: (cd['ts'], cd['sha']))
+    commit_list = sorted(
+        commits.values(),
+        key=lambda cd: (cd['ts'], cd['sha']))
     master_head = repo.head.commit.hexsha
     data = {
         'commit_list': commit_list,
