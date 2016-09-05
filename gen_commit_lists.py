@@ -20,11 +20,9 @@ DIRNAME = 'commit_list'
 
 def gen_commit_list(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    if utils.data_exists(basename, DIRNAME):
-        return
 
     if not utils.data_exists(basename, download_prs.DIRNAME):
-        # We haven't downloaded all PRs yet
+        print('Not all PRs downloaded for %s' % repo_dict['full_name'])
         return
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
@@ -73,8 +71,7 @@ def gen_commit_list(repo_dict, verbose):
 
 def main():
     parser = argparse.ArgumentParser('Generate a list of all commits in a repository')
-    utils.ensure_datadir(DIRNAME)
-    utils.iter_repos(parser, 'Extracting commits', gen_commit_list)
+    utils.iter_repos(parser, DIRNAME, gen_commit_list)
 
 if __name__ == '__main__':
     main()

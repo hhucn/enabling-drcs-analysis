@@ -11,10 +11,8 @@ import query
 DIRNAME = 'pulls/'
 
 
-def fetch_prs(repo_dict, verbose):
+def list_prs(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    if utils.data_exists(basename, DIRNAME):
-        return
 
     if verbose:
         print('PRs of %s ...' % repo_dict['html_url'])
@@ -29,22 +27,8 @@ def fetch_prs(repo_dict, verbose):
 
 
 def main():
-    parser = argparse.ArgumentParser('Download all pull requests')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
-    args = parser.parse_args()
-
-    config = utils.read_config()
-    ignored_repos = set(config.get('ignored_repos', []))
-
-    utils.ensure_datadir(DIRNAME)
-
-    initials = utils.read_data('list')
-    if not args.verbose:
-        initials = progress.bar.Bar('Listing PRs').iter(initials)
-    for irepo in initials:
-        if irepo['full_name'] in ignored_repos:
-            continue
-        fetch_prs(irepo, args.verbose)
+    parser = argparse.ArgumentParser('List all pull requests')
+    utils.iter_repos(parser, DIRNAME, list_prs)
 
 if __name__ == '__main__':
     main()

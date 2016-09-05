@@ -85,7 +85,7 @@ def safe_filename(n):
     return res
 
 
-def iter_repos(parser, msg, func):
+def iter_repos(parser, dirname, func):
     parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed status')
     parser.add_argument('-q', '--no-status', action='store_true', help='Do not show progress bars')
     args = parser.parse_args()
@@ -93,13 +93,21 @@ def iter_repos(parser, msg, func):
     config = read_config()
     ignored_repos = set(config.get('ignored_repos', []))
 
-    initials = read_data('list')
+    ensure_datadir(dirname)
+
+    initial_repos = read_data('list')
     if not args.verbose and not args.no_status:
-        initials = progress.bar.Bar(msg).iter(initials)
-    for irepo in initials:
-        if irepo['full_name'] in ignored_repos:
+        msg = dirname.rstrip('/')
+        initial_repos = progress.bar.Bar(msg).iter(initial_repos)
+    for repo_dict in initial_repos:
+        if repo_dict['full_name'] in ignored_repos:
             continue
-        func(irepo, args.verbose)
+
+        basename = safe_filename(repo_dict['full_name'])
+        if data_exists(basename, dirname):
+            continue
+
+        func(repo_dict, args.verbose)
 
 
 def chunks(l, n):

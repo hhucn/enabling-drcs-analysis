@@ -14,7 +14,7 @@ import list_prs
 
 
 
-DIRNAME = 'downloaded_prs'
+DIRNAME = 'download_prs'
 
 
 def branch_name(pr):
@@ -23,8 +23,6 @@ def branch_name(pr):
 
 def download_prs(repo_dict, verbose):
     basename = utils.safe_filename(repo_dict['full_name'])
-    if utils.data_exists(basename, DIRNAME):
-        return
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
@@ -61,9 +59,8 @@ def download_prs(repo_dict, verbose):
 
 
 def main():
-    utils.ensure_datadir(DIRNAME)
     parser = argparse.ArgumentParser('Download pull requests')
-    utils.iter_repos(parser, 'Downloading PRs', download_prs)
+    utils.iter_repos(parser, DIRNAME, download_prs)
 
 if __name__ == '__main__':
     main()
