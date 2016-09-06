@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+from __future__ import division
 
 import argparse
+import math
 import time
 
 import progress
@@ -12,6 +14,26 @@ import list_prs
 
 
 DIRNAME = 'download_prs'
+
+
+def download_chunks(origin, failures, prs, chunk_size):
+    if chunk_size == 1:
+        for pr in prs:
+            try:
+                origin.fetch(branch_name(pr))
+            except git.exc.GitCommandError as gce:
+                failures.append({
+                    'pull': pr,
+                    'msg': gce.stderr.decode(),
+                })
+    else:
+        for prs_chunk in utils.chunks(prs, chunk_size):
+            try:
+                origin.fetch(list(map(branch_name, prs_chunk)))
+            except git.exc.GitCommandError:
+                new_chunk_size = max(1, int(math.floor(chunk_size / 10)))
+                download_chunks(
+                    origin, failures, prs_chunk, new_chunk_size)
 
 
 def branch_name(pr):
@@ -31,18 +53,7 @@ def download_prs(args, repo_dict):
         prs = progress.bar.Bar(max=len(prs)).iter(prs)
 
     failures = []
-    for prs_chunk in utils.chunks(prs, 100):
-        try:
-            origin.fetch(list(map(branch_name, prs_chunk)))
-        except git.exc.GitCommandError:
-            for pr in prs_chunk:
-                try:
-                    origin.fetch(branch_name(pr))
-                except git.exc.GitCommandError as gce:
-                    failures.append({
-                        'pull': pr,
-                        'msg': gce.stderr.decode(),
-                    })
+    download_chunks(origin, failures, prs, 1000)
 
     utils.write_data(basename, dirname=DIRNAME, data={
         'timestamp': time.time(),
