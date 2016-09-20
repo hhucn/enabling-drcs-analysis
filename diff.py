@@ -2,6 +2,7 @@
 
 import re
 
+
 def eval(c1, c2):
     diffs = c1.diff(c2, create_patch=True)
 

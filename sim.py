@@ -109,8 +109,8 @@ def pick(args, basename, repo):
                 res['head_%d_%s' % (i, h)] = diffr
 
                 tmp_repo.git.checkout(master_commit, force=True)
-                #tmp_repo.merge(head_commit)
-                #res['merged_%d_%s' % (i, h)] = diff.eval(future_commit.diff())
+                # tmp_repo.merge(head_commit)
+                # res['merged_%d_%s' % (i, h)] = diff.eval(future_commit, None)
             # TODO find one or more challengers and calculate their diffs
 
         finally:

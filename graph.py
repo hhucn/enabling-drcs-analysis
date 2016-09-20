@@ -1,7 +1,5 @@
 import collections
 
-import utils
-
 
 def calc_depths(commit_dict):
     to_visit = collections.deque(commit_dict.keys())

@@ -154,3 +154,4 @@ def time_func(func, args=[], kwargs={}):
     res = func(*args, **kwargs)
     end = time.clock()
     print('That took %r seconds' % (end - start))
+    return res

@@ -4,9 +4,10 @@ import sys
 import tempfile
 import unittest
 
+import git
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import git
 
 class DiffTest(unittest.TestCase):
     def test_diff_bin(self):
@@ -62,7 +63,8 @@ class DiffTest(unittest.TestCase):
             _cmd(['git', 'commit', '-am', 'v3'])
             _cmd(['git', 'tag', 'v3'])
             with open(fn, 'wb') as f:
-                f.write(b'The quick\nbrown\nrabbit\njumped\nover a fence\nand a wall\n')
+                f.write(b'The quick\nbrown\nrabbit\njumped\n' +
+                        b'over a fence\nand a wall\n')
             with open(new_fn, 'wb') as f:
                 f.write(b'New file\nis\nnew\n')
             _cmd(['git', 'add', new_fn])

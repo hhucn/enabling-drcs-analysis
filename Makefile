@@ -11,9 +11,9 @@ deps:
 	pip3 install progress requests gitpython
 
 test:
-	nosetests3 .
+	nosetests3 test/
 
 lint:
-	flake8 .
+	flake8 *.py test/
 
 .PHONY: run test lint deps

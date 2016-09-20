@@ -41,7 +41,7 @@ class GraphTest(unittest.TestCase):
 
     def test_calc_size(self):
         import graph
-        
+
         self.assertEqual(graph.calc_size(CD, CD['A']), 6)
         self.assertEqual(graph.calc_size(CD, CD['B']), 5)
         self.assertEqual(graph.calc_size(CD, CD['C']), 3)
