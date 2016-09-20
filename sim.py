@@ -9,6 +9,7 @@ import shutil
 
 import git
 
+import diff
 import download
 import graph
 import utils
@@ -17,17 +18,6 @@ import gen_commit_lists
 
 DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
-
-
-def eval_diff(diff):
-    #print(diff[0].b_blob.size)
-    blob_size = sum(d.b_blob.size if d.b_blob else 0 for d in diff)
-
-    # TODO evaluate more here
-    return {
-        'len': len(diff),
-        'blob_size': blob_size,
-    }
 
 
 # find all newest commits older than ts (but not their parents)
@@ -108,11 +98,11 @@ def pick(args, basename, repo):
             master_commit = tmp_repo.commit(master_sha)
             future_commit = tmp_repo.commit(future_sha)
 
-            res['master'] = eval_diff(future_commit.diff(master_commit))
+            res['master'] = diff.eval(future_commit, master_commit)
 
             for i, h in enumerate(newest_heads):
                 head_commit = tmp_repo.commit(h)
-                diffr = eval_diff(future_commit.diff(head_commit))
+                diffr = diff.eval(future_commit, head_commit)
                 cinfo = commit_dict[h]
                 diffr['size'] = graph.calc_size(commit_dict, cinfo)
                 diffr['depth'] = cinfo['depth']
@@ -120,7 +110,7 @@ def pick(args, basename, repo):
 
                 tmp_repo.git.checkout(master_commit, force=True)
                 #tmp_repo.merge(head_commit)
-                #res['merged_%d_%s' % (i, h)] = eval_diff(future_commit.diff())
+                #res['merged_%d_%s' % (i, h)] = diff.eval(future_commit.diff())
             # TODO find one or more challengers and calculate their diffs
 
         finally:
