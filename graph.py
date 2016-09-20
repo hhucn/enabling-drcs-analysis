@@ -26,17 +26,37 @@ def calc_children(commit_dict):
         c['children'] = set()
     for csha, c in commit_dict.items():
         for psha in c['parents']:
-            p = commit_dict[p]
+            p = commit_dict[psha]
             p['children'].add(csha)
 
 
+def calc_sizes_dumb(commit_dict):
+	for c in commit_dict.values():
+		visited = set()
+		to_visit = collections.deque([c['sha']])
+		while to_visit:
+			nsha = to_visit.pop()
+			n = commit_dict[nsha]
+			if nsha in visited:
+				continue
+			visited.add(nsha)
+			to_visit.extend(n['parents'])
+		c['size'] = len(visited)
+
+
+calc_sizes = calc_sizes_dumb
+
+
+# Clever impl goes here
 def cd2graph(commit_dict):
 	# Use numeric lookup
-	TODO
+	commit_list = list(commit_dict.values())
+	parents = []
+	sha2num = {sha: i for i, sha in enumerate(commit_dict.keys())}
 
 def calc_sizes_cd(commit_dict):
 	g = cd2graph(commit_dict)
 
 
-def calc_sizes(g):
+def calc_sizes_graph(g):
 	TODO
