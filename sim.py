@@ -83,7 +83,9 @@ def pick(args, basename, repo):
             heads,
             key=lambda sha: commit_dict[sha]['ts'],
             reverse=True)
-        newest_heads = sorted_heads[:9]
+        head_count = sim_config['experiments_head_count']
+        if head_count:
+            newest_heads = sorted_heads[:head_count]
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
         tmp_repo_path = utils.calc_filename(
@@ -98,16 +100,19 @@ def pick(args, basename, repo):
             master_commit = tmp_repo.commit(master_sha)
             future_commit = tmp_repo.commit(future_sha)
 
-            res['master'] = diff.eval(future_commit, master_commit)
+            res['master'] = [diff.eval(future_commit, master_commit)]
 
+            res['newest_heads'] = []
             for i, h in enumerate(newest_heads):
                 head_commit = tmp_repo.commit(h)
-                diffr = diff.eval(future_commit, head_commit)
+                eres = diff.eval(future_commit, head_commit)
                 cinfo = commit_dict[h]
-                diffr['size'] = graph.calc_size(commit_dict, cinfo)
-                diffr['depth'] = cinfo['depth']
-                res['head_%d_%s' % (i, h)] = diffr
+                eres['size'] = graph.calc_size(commit_dict, cinfo)
+                eres['depth'] = cinfo['depth']
+                eres['sha'] = h
+                res['newest_heads'].append(eres)
 
+            for i, h in enumerate(newest_heads):
                 tmp_repo.git.checkout(master_commit, force=True)
                 # tmp_repo.merge(head_commit)
                 # res['merged_%d_%s' % (i, h)] = diff.eval(future_commit, None)
