@@ -39,16 +39,14 @@ class GraphTest(unittest.TestCase):
         self.assertEqual(CD['G']['depth'], 1)
         self.assertEqual(CD['H']['depth'], 0)
 
-    def test_calc_sizes(self):
+    def test_calc_size(self):
         import graph
-
-        graph.calc_children(CD)
-        graph.calc_sizes(CD)
-        self.assertEqual(CD['A']['size'], 6)
-        self.assertEqual(CD['B']['size'], 5)
-        self.assertEqual(CD['C']['size'], 3)
-        self.assertEqual(CD['D']['size'], 3)
-        self.assertEqual(CD['E']['size'], 2)
-        self.assertEqual(CD['F']['size'], 1)
-        self.assertEqual(CD['G']['size'], 2)
-        self.assertEqual(CD['H']['size'], 1)
+        
+        self.assertEqual(graph.calc_size(CD, CD['A']), 6)
+        self.assertEqual(graph.calc_size(CD, CD['B']), 5)
+        self.assertEqual(graph.calc_size(CD, CD['C']), 3)
+        self.assertEqual(graph.calc_size(CD, CD['D']), 3)
+        self.assertEqual(graph.calc_size(CD, CD['E']), 2)
+        self.assertEqual(graph.calc_size(CD, CD['F']), 1)
+        self.assertEqual(graph.calc_size(CD, CD['G']), 2)
+        self.assertEqual(graph.calc_size(CD, CD['H']), 1)
