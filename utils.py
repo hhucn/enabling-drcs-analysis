@@ -147,3 +147,10 @@ def timestr(ts):
 
 def evince(obj):
     print(json.dumps(obj, indent=2))
+
+
+def time_func(func, args=[], kwargs={}):
+    start = time.clock()
+    res = func(*args, **kwargs)
+    end = time.clock()
+    print('That took %r seconds' % (end - start))

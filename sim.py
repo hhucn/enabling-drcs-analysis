@@ -63,7 +63,6 @@ def pick(args, basename, repo):
     commit_dict = {c['sha']: c for c in commit_list}
     graph.calc_children(commit_dict)
     graph.calc_depths(commit_dict)
-    graph.calc_sizes(commit_dict)
 
     def find_master_commit(ts):
         c = commit_dict[commit_list_data['master_head']]
@@ -115,10 +114,9 @@ def pick(args, basename, repo):
                 head_commit = tmp_repo.commit(h)
                 diffr = eval_diff(future_commit.diff(head_commit))
                 cinfo = commit_dict[h]
-                diffr['size'] = cinfo['size']
+                diffr['size'] = graph.calc_size(commit_dict, cinfo)
                 diffr['depth'] = cinfo['depth']
                 res['head_%d_%s' % (i, h)] = diffr
-
 
                 tmp_repo.git.checkout(master_commit, force=True)
                 #tmp_repo.merge(head_commit)
