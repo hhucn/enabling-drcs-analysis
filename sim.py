@@ -10,6 +10,7 @@ import shutil
 import git
 
 import download
+import graph
 import utils
 import gen_commit_lists
 
@@ -60,9 +61,9 @@ def pick(args, basename, repo):
     commit_list_data = utils.read_data(basename, gen_commit_lists.DIRNAME)
     commit_list = commit_list_data['commit_list']
     commit_dict = {c['sha']: c for c in commit_list}
-    calc_children(commit_dict)
-    calc_depths(commit_dict)
-    calc_sizes(commit_dict)
+    graph.calc_children(commit_dict)
+    graph.calc_depths(commit_dict)
+    graph.calc_sizes(commit_dict)
 
     def find_master_commit(ts):
         c = commit_dict[commit_list_data['master_head']]
