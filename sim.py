@@ -100,17 +100,24 @@ def pick(args, basename, repo):
             master_commit = tmp_repo.commit(master_sha)
             future_commit = tmp_repo.commit(future_sha)
 
-            res['master'] = [diff.eval(future_commit, master_commit)]
+            master_info = commit_dict[master_sha]
+            res['master'] = [{
+                'diff': diff.eval(future_commit, master_commit),
+                'size': graph.calc_size(commit_dict, master_info),
+                'depth': master_info['depth'],
+                'sha': master_info['sha'],
+            }]
 
             res['newest_heads'] = []
             for i, h in enumerate(newest_heads):
                 head_commit = tmp_repo.commit(h)
-                eres = diff.eval(future_commit, head_commit)
                 cinfo = commit_dict[h]
-                eres['size'] = graph.calc_size(commit_dict, cinfo)
-                eres['depth'] = cinfo['depth']
-                eres['sha'] = h
-                res['newest_heads'].append(eres)
+                res['newest_heads'].append({
+                    'sha': cinfo['sha'],
+                    'diff': diff.eval(future_commit, head_commit),
+                    'size': graph.calc_size(commit_dict, cinfo),
+                    'depth': cinfo['depth'],
+                })
 
             for i, h in enumerate(newest_heads):
                 tmp_repo.git.checkout(master_commit, force=True)
