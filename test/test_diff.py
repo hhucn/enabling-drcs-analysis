@@ -92,5 +92,34 @@ class DiffTest(unittest.TestCase):
                 'len': 2,
             })
 
+    def test_rename(self):
+        import diff
+
+        with tempfile.TemporaryDirectory(suffix='df-gha-test') as td:
+            def _cmd(argv):
+                subprocess.check_call(argv, cwd=td, stdout=subprocess.DEVNULL)
+
+            _cmd(['git', 'init'])
+
+            fn = os.path.join(td, 'txtfile')
+            with open(fn, 'wb') as f:
+                f.write(b'data does\nnot\matter\nhere\n')
+            _cmd(['git', 'add', fn])
+            _cmd(['git', 'commit', '-m', 'v1'])
+            _cmd(['git', 'tag', 'v1'])
+            _cmd(['git', 'mv', 'txtfile', 'renamed_file'])
+            _cmd(['git', 'commit', '-am', 'v2'])
+            _cmd(['git', 'tag', 'v2'])
+
+            repo = git.Repo(td)
+            v1 = repo.commit('v1')
+            v2 = repo.commit('v2')
+            dres = diff.eval(v1, v2)
+            self.assertEqual(dres, {
+                'lines': 0,
+                'len': 1,
+            })
+
+
 if __name__ == '__main__':
     unittest.main()
