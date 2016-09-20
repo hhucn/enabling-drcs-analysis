@@ -103,7 +103,7 @@ class DiffTest(unittest.TestCase):
 
             fn = os.path.join(td, 'txtfile')
             with open(fn, 'wb') as f:
-                f.write(b'data does\nnot\matter\nhere\n')
+                f.write(b'data does\nnot\nmatter\nhere\n')
             _cmd(['git', 'add', fn])
             _cmd(['git', 'commit', '-m', 'v1'])
             _cmd(['git', 'tag', 'v1'])
@@ -119,6 +119,33 @@ class DiffTest(unittest.TestCase):
                 'lines': 0,
                 'len': 1,
             })
+
+    def test_local(self):
+        import diff
+
+        with tempfile.TemporaryDirectory(suffix='df-gha-test') as td:
+            def _cmd(argv):
+                subprocess.check_call(argv, cwd=td, stdout=subprocess.DEVNULL)
+
+            _cmd(['git', 'init'])
+
+            fn = os.path.join(td, 'txtfile')
+            with open(fn, 'wb') as f:
+                f.write(b'data does\n\nmatter\nhere\n')
+            _cmd(['git', 'add', fn])
+            _cmd(['git', 'commit', '-m', 'v1'])
+            _cmd(['git', 'tag', 'v1'])
+            with open(fn, 'wb') as f:
+                f.write(b'Brown fox\n')
+
+            repo = git.Repo(td)
+            v1 = repo.commit('v1')
+            dres = diff.eval(v1, None)
+            self.assertEqual(dres, {
+                'lines': 5,
+                'len': 1,
+            })
+
 
 
 if __name__ == '__main__':
