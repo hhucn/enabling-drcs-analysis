@@ -11,9 +11,10 @@ import git
 
 import diff
 import download
-import graph
-import utils
 import gen_commit_lists
+import graph
+import simutils
+import utils
 
 
 DIRNAME = 'sim_results'
@@ -119,11 +120,12 @@ def pick(args, basename, repo):
                     'depth': cinfo['depth'],
                 })
 
-            for i, h in enumerate(newest_heads):
-                tmp_repo.git.checkout(master_commit, force=True)
-                tmp_repo.merge(head_commit)
-                # res['merged_%d_%s' % (i, h)] = diff.eval(future_commit, None)
+            # Try greedy merging by date
+            res['merge_greedy_date'] = simutils.merge_greedy(
+                tmp_repo, newest_heads, future_commit)
             # TODO find one or more challengers and calculate their diffs
+
+            # TODO order differently
 
         finally:
             if not args.keep:
