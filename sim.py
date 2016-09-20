@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import collections
 import random
 import time
 
@@ -18,9 +19,38 @@ TMP_REPOS = 'sim_tmp'
 
 
 def eval_diff(diff):
+    #print(diff[0].b_blob.size)
+    blob_size = sum(d.b_blob.size if d.b_blob else 0 for d in diff)
+
+    # TODO evaluate more here
     return {
         'len': len(diff),
+        'blob_size': blob_size,
     }
+
+
+# find all newest commits older than ts (but not their parents)
+def find_all_heads(commit_dict, ts):
+    visited = set()
+    heads = set()
+    to_explore = collections.deque()
+    for c in commit_dict.values():
+        if c['ts'] > ts:
+            continue
+        if c['sha'] in visited:
+            continue
+        visited.add(c['sha'])
+        heads.add(c['sha'])
+        to_explore.extend(c['parents'])
+        while to_explore:
+            sha = to_explore.popleft()
+            if sha in heads:
+                heads.remove(sha)
+            if sha in visited:
+                continue
+            visited.add(sha)
+            to_explore.extend(commit_dict[sha]['parents'])
+    return heads
 
 
 def pick(args, basename, repo):
@@ -30,6 +60,9 @@ def pick(args, basename, repo):
     commit_list_data = utils.read_data(basename, gen_commit_lists.DIRNAME)
     commit_list = commit_list_data['commit_list']
     commit_dict = {c['sha']: c for c in commit_list}
+    calc_children(commit_dict)
+    calc_depths(commit_dict)
+    calc_sizes(commit_dict)
 
     def find_master_commit(ts):
         c = commit_dict[commit_list_data['master_head']]
@@ -55,6 +88,13 @@ def pick(args, basename, repo):
             ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
         future_sha = find_master_commit(future_ts)['sha']
 
+        heads = find_all_heads(commit_dict, ts)
+        sorted_heads = sorted(
+            heads,
+            key=lambda sha: commit_dict[sha]['ts'],
+            reverse=True)
+        newest_heads = sorted_heads[:9]
+
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
         tmp_repo_path = utils.calc_filename(
             basename, dirname=TMP_REPOS, suffix=suffix)
@@ -68,9 +108,22 @@ def pick(args, basename, repo):
             master_commit = tmp_repo.commit(master_sha)
             future_commit = tmp_repo.commit(future_sha)
 
+            res['master'] = eval_diff(future_commit.diff(master_commit))
+
+            for i, h in enumerate(newest_heads):
+                head_commit = tmp_repo.commit(h)
+                diffr = eval_diff(future_commit.diff(head_commit))
+                cinfo = commit_dict[h]
+                diffr['size'] = cinfo['size']
+                diffr['depth'] = cinfo['depth']
+                res['head_%d_%s' % (i, h)] = diffr
+
+
+                tmp_repo.git.checkout(master_commit, force=True)
+                #tmp_repo.merge(head_commit)
+                #res['merged_%d_%s' % (i, h)] = eval_diff(future_commit.diff())
             # TODO find one or more challengers and calculate their diffs
 
-            res['master'] = eval_diff(future_commit.diff(master_commit))
         finally:
             if not args.keep:
                 shutil.rmtree(tmp_repo_path)
