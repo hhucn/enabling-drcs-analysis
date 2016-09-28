@@ -80,6 +80,7 @@ def pick(args, basename, repo):
         future_sha = find_master_commit(future_ts)['sha']
 
         heads = find_all_heads(commit_dict, ts)
+        authors = simutils.count_authors(commit_dict, ts)
 
         head_count = sim_config['experiments_head_count']
         sorted_time_heads = sorted(

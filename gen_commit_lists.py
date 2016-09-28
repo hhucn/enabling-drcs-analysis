@@ -29,6 +29,7 @@ def gen_commit_list(args, repo_dict):
 
     def _collect_commit(c):
         return {
+#            'author': c.author.name,
             'parents': tuple(p.hexsha for p in c.parents),
             'sha': c.hexsha,
             'ts': c.committed_date,

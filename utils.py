@@ -124,11 +124,13 @@ def iter_repos(parser, dirname, func):
 
         return True
 
-    initial_repos = list(filter(_should_visit, read_data('list')))
+    initial_repos = list(read_data('list'))
     if not args.verbose and not args.no_status:
         msg = dirname.rstrip('/')
         initial_repos = progress.bar.Bar(msg).iter(initial_repos)
     for repo_dict in initial_repos:
+        if not _should_visit(repo_dict):
+            continue
         func(args, repo_dict)
 
 
