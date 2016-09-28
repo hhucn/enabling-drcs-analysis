@@ -37,7 +37,8 @@ class MergeTest(unittest.TestCase):
             _cmd(['git', 'commit', '-am', 'v3'])
             _cmd(['git', 'tag', 'v3'])
 
-            simutils.merge_greedy(tmp_repo, ['v2', 'v3'])
+            merged = simutils.merge_greedy(tmp_repo, ['v2', 'v3'])
+            self.assertEqual(merged, ['v2', 'v3'])
             with open(fn, 'r') as f:
                 content = f.read()
             self.assertEqual(content, 'The quick\nbrown\nrabbit\njumped\nover a fence\n')

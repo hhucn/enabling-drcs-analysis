@@ -1,3 +1,6 @@
+store all experiments in one file (parameter out_fn)
+save upon crash
+
 evaluate whether we can merge using IndexFiles (should be faster)
 download_pulls (downloads references to all pulls)
 merge: only backout partially

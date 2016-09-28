@@ -8,7 +8,6 @@ import graph
 def merge_greedy(tmp_repo, shas):
     tmp_repo.git.checkout(shas[0], force=True)
     merged = [shas[0]]
-    assert tmp_repo.head.object.hexsha == merged[0]
     for sha in shas[1:]:
         try:
             tmp_repo.git.merge(sha)

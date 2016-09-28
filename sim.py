@@ -3,9 +3,9 @@
 import argparse
 import collections
 import random
-import time
-
+import re
 import shutil
+import time
 
 import git
 
@@ -21,7 +21,7 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
-def run(args, basename, repo):
+def run(args, basename, repo, rng):
     sim_config = args.config['sim']
     utils.ensure_datadir(TMP_REPOS)
 
@@ -43,9 +43,7 @@ def run(args, basename, repo):
     last_idx = round(sim_config['cutoff_commits_last'] * len(commit_list))
     last_time = commit_list[last_idx]['ts']
 
-    rng = random.Random(0)
     now = time.time()
-    experiments = []
     for i in range(sim_config['experiments_per_repo']):
         ts = rng.randint(first_time, last_time)
 
@@ -84,7 +82,7 @@ def run(args, basename, repo):
 
             future_commit = tmp_repo.commit(future_sha)
 
-            res['master'] = simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)
+            res['master'] = [simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)]
 
             for ckey, shas in by_crits.items():
                 res['merge_greedy_%s' % ckey] = [
@@ -103,28 +101,32 @@ def run(args, basename, repo):
             'future_ts': future_ts,
             'future_sha': future_sha,
             'res': res,
+            'config': sim_config,
         }
-        utils.evince(experiment)
-        experiments.append(experiment)
-
-    utils.write_data(basename, dirname=DIRNAME, data={
-        'config': sim_config,
-        'experiments': experiments,
-    })
+        yield experiment
 
 
-def sim_repo(args, repo_dict):
-    basename = utils.safe_filename(repo_dict['full_name'])
+def run_experiments(args, all_repos):
+    rng = random.Random(0)
+    n = args.n
+    count = 0
+    while count < n:
+        repo_dict = rng.choice(all_repos)
 
-    if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-        if args.verbose or args.no_status:
-            print('No commit list for %s' % repo_dict['full_name'])
-        return
+        basename = utils.safe_filename(repo_dict['full_name'])
 
-    path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
-    repo = git.repo.Repo(path)
+        if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
+            if args.verbose or args.no_status:
+                print('No commit list for %s, skipping.' % repo_dict['full_name'])
+            return
+        print('[%d/%d] %s' % (count, n, basename))
 
-    run(args, basename, repo)
+        path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
+        repo = git.repo.Repo(path)
+
+        for e in run(args, basename, repo, rng):
+            count += 1
+            yield e
 
 
 def main():
@@ -134,7 +136,44 @@ def main():
         '-k', '--keep', action='store_true',
         help='Keep temporary repositories'
     )
-    utils.iter_repos(parser, DIRNAME, sim_repo)
+    parser.add_argument(
+        '-f', '--filter',
+        metavar='REGEXP', type=re.compile,
+        help='Filter by repository fullname (regular expressions)')
+    parser.add_argument(
+        '-n', '--experiment-count', default=1000,
+        metavar='COUNT', type=int, dest='n',
+        help='Number of experiments to perform')
+    args = parser.parse_args()
+
+    config = utils.read_config()
+    ignored_repos = set(config.get('ignored_repos', []))
+
+    utils.ensure_datadir(DIRNAME)
+    args.config = config
+
+    def _should_visit(repo_dict):
+        if repo_dict['full_name'] in ignored_repos:
+            return False
+
+        if args.filter and not args.filter.search(repo_dict['full_name']):
+            return False
+
+        return True
+
+    all_repos = list(filter(_should_visit, utils.read_data('list')))
+    experiments = []
+    try:
+        for e in run_experiments(args, all_repos):
+            experiments.append(e)
+    except KeyboardInterrupt:
+        pass
+
+    basename = 'experiments'
+    fn = utils.calc_filename(basename, dirname=DIRNAME)
+    print('Writing %d experiments to %s ...' % (len(experiments), fn))
+    utils.write_data(basename, experiments, dirname=DIRNAME)
+
 
 if __name__ == '__main__':
     main()
