@@ -80,13 +80,21 @@ def pick(args, basename, repo):
         future_sha = find_master_commit(future_ts)['sha']
 
         heads = find_all_heads(commit_dict, ts)
-        sorted_heads = sorted(
+
+        sorted_time_heads = sorted(
             heads,
             key=lambda sha: commit_dict[sha]['ts'],
             reverse=True)
+        sorted_depth_heads = sorted(
+            heads,
+            key=lambda sha: commit_dict[sha]['depth'],
+            reverse=True)
+        sorted_size_heads = sorted(
+            heads,
+            key=lambda sha: graph.calc_size(commit_dict, commit_dict[sha]))
+
         head_count = sim_config['experiments_head_count']
-        if head_count:
-            newest_heads = sorted_heads[:head_count]
+        newest_heads = sorted_time_heads[:head_count]
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
         tmp_repo_path = utils.calc_filename(
@@ -120,9 +128,15 @@ def pick(args, basename, repo):
                     'depth': cinfo['depth'],
                 })
 
-            # Try greedy merging by date
-            res['merge_greedy_date'] = simutils.merge_greedy_diff(
+            res['merge_greedy_newest'] = simutils.merge_greedy_diff(
                 tmp_repo, newest_heads, future_commit)
+            res['merge_greedy_time'] = simutils.merge_greedy_diff(
+                tmp_repo, sorted_time_heads, future_commit)
+            res['merge_greedy_depth'] = simutils.merge_greedy_diff(
+                tmp_repo, sorted_depth_heads, future_commit)
+            res['merge_greedy_size'] = simutils.merge_greedy_diff(
+                tmp_repo, sorted_size_heads, future_commit)
+
             # TODO find one or more challengers and calculate their diffs
 
             # TODO order differently
