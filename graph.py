@@ -41,3 +41,36 @@ def calc_size(commit_dict, c):
         visited.add(nsha)
         to_visit.extend(n['parents'])
     return len(visited)
+
+
+# find all newest commits older than ts (but not their parents)
+def find_all_heads(commit_dict, ts):
+    visited = set()
+    heads = set()
+    to_explore = collections.deque()
+    for c in commit_dict.values():
+        if c['ts'] > ts:
+            continue
+        if c['sha'] in visited:
+            continue
+        visited.add(c['sha'])
+        heads.add(c['sha'])
+        to_explore.extend(c['parents'])
+        while to_explore:
+            sha = to_explore.popleft()
+            if sha in heads:
+                heads.remove(sha)
+            if sha in visited:
+                continue
+            visited.add(sha)
+            to_explore.extend(commit_dict[sha]['parents'])
+    return heads
+
+
+def count_authors(commit_dict, ts):
+    authors = collections.Counter()
+    for c in commit_dict.values():
+        if c['ts'] > ts:
+            continue
+        authors[c['author']] += 1
+    return authors

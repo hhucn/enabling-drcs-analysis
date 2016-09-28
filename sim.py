@@ -21,31 +21,7 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
-# find all newest commits older than ts (but not their parents)
-def find_all_heads(commit_dict, ts):
-    visited = set()
-    heads = set()
-    to_explore = collections.deque()
-    for c in commit_dict.values():
-        if c['ts'] > ts:
-            continue
-        if c['sha'] in visited:
-            continue
-        visited.add(c['sha'])
-        heads.add(c['sha'])
-        to_explore.extend(c['parents'])
-        while to_explore:
-            sha = to_explore.popleft()
-            if sha in heads:
-                heads.remove(sha)
-            if sha in visited:
-                continue
-            visited.add(sha)
-            to_explore.extend(commit_dict[sha]['parents'])
-    return heads
-
-
-def pick(args, basename, repo):
+def run(args, basename, repo):
     sim_config = args.config['sim']
     utils.ensure_datadir(TMP_REPOS)
 
@@ -79,24 +55,22 @@ def pick(args, basename, repo):
             ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
         future_sha = find_master_commit(future_ts)['sha']
 
-        heads = find_all_heads(commit_dict, ts)
-        authors = simutils.count_authors(commit_dict, ts)
+        heads = graph.find_all_heads(commit_dict, ts)
+        author_counts = graph.count_authors(commit_dict, ts)
 
         head_count = sim_config['experiments_head_count']
-        sorted_time_heads = sorted(
-            heads,
-            key=lambda sha: commit_dict[sha]['ts'],
-            reverse=True)[:head_count]
-        sorted_depth_heads = sorted(
-            heads,
-            key=lambda sha: commit_dict[sha]['depth'],
-            reverse=True)[:head_count]
-        sorted_size_heads = sorted(
-            heads,
-            key=lambda sha: graph.calc_size(commit_dict, commit_dict[sha]),
-            reverse=True)[:head_count]
+        def _select(crit_func):
+            return sorted(
+                heads,
+                key=crit_func,
+                reverse=True)[:head_count]
 
-        newest_heads = sorted_time_heads[:head_count]
+        by_crits = {
+            'ts': _select(lambda sha: commit_dict[sha]['ts']),
+            'depth': _select(lambda sha: commit_dict[sha]['depth']),
+            'size': _select(lambda sha: graph.calc_size(commit_dict, commit_dict[sha])),
+            'author': _select(lambda sha: author_counts[commit_dict[sha]['author']]),
+        }
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
         tmp_repo_path = utils.calc_filename(
@@ -112,16 +86,12 @@ def pick(args, basename, repo):
 
             res['master'] = simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)
 
-            res['newest_heads'] = [simutils.eval_straight(tmp_repo, commit_dict, future_commit, h) for h in newest_heads]
-
-            res['merge_greedy_newest'] = simutils.merge_greedy_diff(
-                tmp_repo, newest_heads, future_commit)
-            res['merge_greedy_time'] = simutils.merge_greedy_diff(
-                tmp_repo, sorted_time_heads, future_commit)
-            res['merge_greedy_depth'] = simutils.merge_greedy_diff(
-                tmp_repo, sorted_depth_heads, future_commit)
-            res['merge_greedy_size'] = simutils.merge_greedy_diff(
-                tmp_repo, sorted_size_heads, future_commit)
+            for ckey, shas in by_crits.items():
+                res['merge_greedy_%s' % ckey] = [
+                    simutils.merge_greedy_diff(tmp_repo, shas, future_commit)]
+                res['topmost_%s' % ckey] = [
+                    simutils.eval_straight(tmp_repo, commit_dict, future_commit, sha) for sha in shas
+                ]
         finally:
             if not args.keep:
                 shutil.rmtree(tmp_repo_path)
@@ -143,7 +113,7 @@ def pick(args, basename, repo):
     })
 
 
-def sim_pick(args, repo_dict):
+def sim_repo(args, repo_dict):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
@@ -154,7 +124,7 @@ def sim_pick(args, repo_dict):
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
 
-    pick(args, basename, repo)
+    run(args, basename, repo)
 
 
 def main():
@@ -164,7 +134,7 @@ def main():
         '-k', '--keep', action='store_true',
         help='Keep temporary repositories'
     )
-    utils.iter_repos(parser, DIRNAME, sim_pick)
+    utils.iter_repos(parser, DIRNAME, sim_repo)
 
 if __name__ == '__main__':
     main()
