@@ -92,7 +92,8 @@ def pick(args, basename, repo):
             reverse=True)[:head_count]
         sorted_size_heads = sorted(
             heads,
-            key=lambda sha: graph.calc_size(commit_dict, commit_dict[sha]))[:head_count]
+            key=lambda sha: graph.calc_size(commit_dict, commit_dict[sha]),
+            reverse=True)[:head_count]
 
         newest_heads = sorted_time_heads[:head_count]
 
