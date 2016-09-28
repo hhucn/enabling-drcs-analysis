@@ -108,27 +108,11 @@ def pick(args, basename, repo):
             repo.clone(tmp_repo_path)
             tmp_repo = git.repo.Repo(tmp_repo_path)
 
-            master_commit = tmp_repo.commit(master_sha)
             future_commit = tmp_repo.commit(future_sha)
 
-            master_info = commit_dict[master_sha]
-            res['master'] = [{
-                'diff': diff.eval(future_commit, master_commit),
-                'size': graph.calc_size(commit_dict, master_info),
-                'depth': master_info['depth'],
-                'sha': master_info['sha'],
-            }]
+            res['master'] = simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)
 
-            res['newest_heads'] = []
-            for i, h in enumerate(newest_heads):
-                head_commit = tmp_repo.commit(h)
-                cinfo = commit_dict[h]
-                res['newest_heads'].append({
-                    'sha': cinfo['sha'],
-                    'diff': diff.eval(future_commit, head_commit),
-                    'size': graph.calc_size(commit_dict, cinfo),
-                    'depth': cinfo['depth'],
-                })
+            res['newest_heads'] = [simutils.eval_straight(tmp_repo, commit_dict, future_commit, h) for h in newest_heads]
 
             res['merge_greedy_newest'] = simutils.merge_greedy_diff(
                 tmp_repo, newest_heads, future_commit)
@@ -138,11 +122,6 @@ def pick(args, basename, repo):
                 tmp_repo, sorted_depth_heads, future_commit)
             res['merge_greedy_size'] = simutils.merge_greedy_diff(
                 tmp_repo, sorted_size_heads, future_commit)
-
-            # TODO find one or more challengers and calculate their diffs
-
-            # TODO order differently
-
         finally:
             if not args.keep:
                 shutil.rmtree(tmp_repo_path)
@@ -180,7 +159,7 @@ def sim_pick(args, repo_dict):
 
 def main():
     parser = argparse.ArgumentParser(
-        'Pick random times and commits for experiments')
+        'Run experiments at random times')
     parser.add_argument(
         '-k', '--keep', action='store_true',
         help='Keep temporary repositories'
