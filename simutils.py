@@ -16,5 +16,5 @@ def merge_greedy(tmp_repo, shas):
 
 
 def merge_greedy_diff(tmp_repos, shas, future_commit):
-	merge_greedy(tmp_repo, shas)
-	return diff.eval(future_commit)
+	merged = merge_greedy(tmp_repo, shas)
+	return (merged, diff.eval(future_commit))
