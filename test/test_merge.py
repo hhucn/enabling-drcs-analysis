@@ -21,7 +21,6 @@ class MergeTest(unittest.TestCase):
             tmp_repo = git.Repo(td)
 
             fn = os.path.join(td, 'txtfile')
-            new_fn = os.path.join(td, 'newfn')
             with open(fn, 'w') as f:
                 f.write('The quick\ngreen\nrabbit\njumped\n')
             _cmd(['git', 'add', fn])

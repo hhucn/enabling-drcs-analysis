@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import random
 import re
 import shutil
@@ -42,67 +43,68 @@ def run(args, basename, repo, rng):
     last_time = commit_list[last_idx]['ts']
 
     now = time.time()
-    for i in range(sim_config['experiments_per_repo']):
-        ts = rng.randint(first_time, last_time)
+    ts = rng.randint(first_time, last_time)
 
-        master_sha = find_master_commit(ts)['sha']
+    master_sha = find_master_commit(ts)['sha']
 
-        future_ts = (
-            ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
-        future_sha = find_master_commit(future_ts)['sha']
+    future_ts = (
+        ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
+    future_sha = find_master_commit(future_ts)['sha']
 
-        heads = graph.find_all_heads(commit_dict, ts)
-        author_counts = graph.count_authors(commit_dict, ts)
+    heads = graph.find_all_heads(commit_dict, ts)
+    author_counts = graph.count_authors(commit_dict, ts)
 
-        head_count = sim_config['experiments_head_count']
+    def _select(crit_func):
+        return sorted(
+            heads,
+            key=crit_func,
+            reverse=True)
 
-        def _select(crit_func):
-            return sorted(
-                heads,
-                key=crit_func,
-                reverse=True)[:head_count]
+    by_crits = {
+        'ts': _select(lambda sha: commit_dict[sha]['ts']),
+        'depth': _select(lambda sha: commit_dict[sha]['depth']),
+        'size': _select(lambda sha: graph.calc_size(commit_dict, commit_dict[sha])),
+        'author': _select(lambda sha: author_counts[commit_dict[sha]['author']]),
+    }
 
-        by_crits = {
-            'ts': _select(lambda sha: commit_dict[sha]['ts']),
-            'depth': _select(lambda sha: commit_dict[sha]['depth']),
-            'size': _select(lambda sha: graph.calc_size(commit_dict, commit_dict[sha])),
-            'author': _select(lambda sha: author_counts[commit_dict[sha]['author']]),
-        }
+    head_counts = sim_config['experiments_head_counts']
+    max_head_count = max(head_counts)
 
-        suffix = '-' + utils.timestr(now) + ('-%d' % i)
-        tmp_repo_path = utils.calc_filename(
-            basename, dirname=TMP_REPOS, suffix=suffix)
-        assert basename in tmp_repo_path
+    suffix = '-%s-%d' % (utils.timestr(now), os.getpid())
+    tmp_repo_path = utils.calc_filename(
+        basename, dirname=TMP_REPOS, suffix=suffix)
+    assert basename in tmp_repo_path
 
-        res = {}
-        try:
-            repo.clone(tmp_repo_path)
-            tmp_repo = git.repo.Repo(tmp_repo_path)
+    res = {}
+    try:
+        repo.clone(tmp_repo_path)
+        tmp_repo = git.repo.Repo(tmp_repo_path)
 
-            future_commit = tmp_repo.commit(future_sha)
+        future_commit = tmp_repo.commit(future_sha)
 
-            res['master'] = [simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)]
+        res['master'] = [simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)]
 
-            for ckey, shas in by_crits.items():
-                res['merge_greedy_%s' % ckey] = [
-                    simutils.merge_greedy_diff(tmp_repo, shas, future_commit)]
-                res['topmost_%s' % ckey] = [
-                    simutils.eval_straight(tmp_repo, commit_dict, future_commit, sha) for sha in shas
-                ]
-        finally:
-            if not args.keep:
-                shutil.rmtree(tmp_repo_path)
+        for ckey, shas in by_crits.items():
+            for hc in head_counts:
+                res['merge_greedy_%s_%d' % (ckey, hc)] = [
+                    simutils.merge_greedy_diff(tmp_repo, commit_dict, future_commit, shas[:hc])]
+            res['topmost_%s' % ckey] = [
+                simutils.eval_straight(tmp_repo, commit_dict, future_commit, sha) for sha in shas[:max_head_count]
+            ]
+    finally:
+        if not args.keep:
+            shutil.rmtree(tmp_repo_path)
 
-        experiment = {
-            'i': i,
-            'ts': ts,
-            'master_sha': master_sha,
-            'future_ts': future_ts,
-            'future_sha': future_sha,
-            'res': res,
-            'config': sim_config,
-        }
-        yield experiment
+    experiment = {
+        'repo': basename,
+        'ts': ts,
+        'master_sha': master_sha,
+        'future_ts': future_ts,
+        'future_sha': future_sha,
+        'res': res,
+        'config': sim_config,
+    }
+    yield experiment
 
 
 def run_experiments(args, all_repos):
