@@ -81,19 +81,19 @@ def pick(args, basename, repo):
 
         heads = find_all_heads(commit_dict, ts)
 
+        head_count = sim_config['experiments_head_count']
         sorted_time_heads = sorted(
             heads,
             key=lambda sha: commit_dict[sha]['ts'],
-            reverse=True)
+            reverse=True)[:head_count]
         sorted_depth_heads = sorted(
             heads,
             key=lambda sha: commit_dict[sha]['depth'],
-            reverse=True)
+            reverse=True)[:head_count]
         sorted_size_heads = sorted(
             heads,
-            key=lambda sha: graph.calc_size(commit_dict, commit_dict[sha]))
+            key=lambda sha: graph.calc_size(commit_dict, commit_dict[sha]))[:head_count]
 
-        head_count = sim_config['experiments_head_count']
         newest_heads = sorted_time_heads[:head_count]
 
         suffix = '-' + utils.timestr(now) + ('-%d' % i)
