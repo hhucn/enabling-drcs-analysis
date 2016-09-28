@@ -34,6 +34,37 @@ def merge_greedy_diff(tmp_repo, commit_dict, future_commit, shas):
     return res
 
 
+def merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_counts):
+    assert head_counts == sorted(head_counts)
+    hc_it = iter(head_counts)
+    hc = next(hc_it)
+    all_res = []
+    tmp_repo.git.checkout(shas[0], force=True)
+    merged = [shas[0]]
+    for idx, sha in enumerate(shas[1:], start=1):
+        assert idx <= hc
+        if idx == hc:
+            res = {}
+            res['head_count'] = hc
+            res['merged_commits'] = merged[:]
+            res['diff'] = diff.eval(future_commit, None)
+            all_res.append(res)
+
+            try:
+                hc = next(hc_it)
+            except StopIteration:
+                break
+
+        try:
+            tmp_repo.git.merge(sha)
+        except git.exc.GitCommandError:
+            tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
+            continue
+        merged.append(sha)
+
+    return all_res
+
+
 def eval_straight(tmp_repo, commit_dict, future_commit, sha):
     commit = tmp_repo.commit(sha)
     res = get_metadata(commit_dict, sha)
