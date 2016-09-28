@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import collections
 import random
 import re
 import shutil
@@ -9,7 +8,6 @@ import time
 
 import git
 
-import diff
 import download
 import gen_commit_lists
 import graph
@@ -57,6 +55,7 @@ def run(args, basename, repo, rng):
         author_counts = graph.count_authors(commit_dict, ts)
 
         head_count = sim_config['experiments_head_count']
+
         def _select(crit_func):
             return sorted(
                 heads,

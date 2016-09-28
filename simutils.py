@@ -1,9 +1,8 @@
-import collections
-
 import git
 
 import diff
 import graph
+
 
 def merge_greedy(tmp_repo, shas):
     tmp_repo.git.checkout(shas[0], force=True)
@@ -11,7 +10,7 @@ def merge_greedy(tmp_repo, shas):
     for sha in shas[1:]:
         try:
             tmp_repo.git.merge(sha)
-        except git.exc.GitCommandError as gce:
+        except git.exc.GitCommandError:
             tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
             continue
         merged.append(sha)
