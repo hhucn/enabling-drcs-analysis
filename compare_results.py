@@ -4,6 +4,7 @@ import argparse
 import collections
 import random
 import time
+import statistics
 
 
 import sim
@@ -17,8 +18,12 @@ def eval_results(experiments):
     for i, e in enumerate(experiments):
         print('[%d] %s' % (i, e['repo']))
         for k, results in sorted(e['res'].items()):
+            result_vals = [r['diff']['lines'] for r in results]
             best = min(results, key=lambda r: r['diff']['lines'])
-            print(' %-20s: best(%2d) %6d out of %3d' % (k, best['param'], best['diff']['lines'], len(results)))
+            print(' %-24s: best(%2d) %6d   avg %6d   median %6d' % (
+                '%s[%d]' % (k, len(results)),
+                best['param'], best['diff']['lines'],
+                statistics.mean(result_vals), statistics.median(result_vals)))
 
 def main():
     parser = argparse.ArgumentParser(
