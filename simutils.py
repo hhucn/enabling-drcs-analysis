@@ -46,6 +46,7 @@ def merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_count
         if idx == hc:
             res = {}
             res['head_count'] = hc
+            res['param'] = hc
             res['merged_commits'] = merged[:]
             res['diff'] = diff.eval(future_commit, None)
             all_res.append(res)
@@ -65,8 +66,12 @@ def merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_count
     return all_res
 
 
-def eval_straight(tmp_repo, commit_dict, future_commit, sha):
-    commit = tmp_repo.commit(sha)
-    res = get_metadata(commit_dict, sha)
-    res['diff'] = diff.eval(future_commit, commit)
-    return res
+def eval_all_straight(tmp_repo, commit_dict, future_commit, shas):
+    all_res = []
+    for i, sha in enumerate(shas):
+        commit = tmp_repo.commit(sha)
+        res = get_metadata(commit_dict, sha)
+        res['diff'] = diff.eval(future_commit, commit)
+        res['val'] = res['index'] = i
+        all_res.append(res)
+    return all_res

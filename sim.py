@@ -82,14 +82,14 @@ def run(args, basename, repo, rng):
 
         future_commit = tmp_repo.commit(future_sha)
 
-        res['master'] = [simutils.eval_straight(tmp_repo, commit_dict, future_commit, master_sha)]
+        res['master'] = simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, [master_sha])
 
         for ckey, shas in by_crits.items():
             res['merge_greedy_%s' % ckey] = (
                 simutils.merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_counts))
-            res['topmost_%s' % ckey] = [
-                simutils.eval_straight(tmp_repo, commit_dict, future_commit, sha) for sha in shas[:max_head_count]
-            ]
+            res['topmost_%s' % ckey] = (
+                simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, shas[:max_head_count])
+            )
     finally:
         if not args.keep:
             shutil.rmtree(tmp_repo_path)
