@@ -121,7 +121,7 @@ def pick(args, basename, repo):
                 })
 
             # Try greedy merging by date
-            res['merge_greedy_date'] = simutils.merge_greedy(
+            res['merge_greedy_date'] = simutils.merge_greedy_diff(
                 tmp_repo, newest_heads, future_commit)
             # TODO find one or more challengers and calculate their diffs
 
