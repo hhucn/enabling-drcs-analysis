@@ -27,6 +27,19 @@ def run(args, basename, repo, rng):
     commit_list_data = utils.read_data(basename, gen_commit_lists.DIRNAME)
     commit_list = commit_list_data['commit_list']
     commit_dict = {c['sha']: c for c in commit_list}
+
+    # Determine sensible times
+    first_idx = round(sim_config['cutoff_commits_first'] * len(commit_list))
+    first_time = commit_list[first_idx]['ts']
+    last_idx = round(sim_config['cutoff_commits_last'] * len(commit_list))
+    last_time = commit_list[last_idx]['ts']
+    ts = rng.randint(first_time, last_time)
+
+    heads = graph.find_all_heads(commit_dict, ts)
+    if len(heads) < sim_config['min_heads']:
+        print('Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
+        return
+
     graph.calc_children(commit_dict)
     graph.calc_depths(commit_dict)
 
@@ -36,22 +49,13 @@ def run(args, basename, repo, rng):
             c = commit_dict[c['parents'][0]]
         return c
 
-    # Determine sensible times
-    first_idx = round(sim_config['cutoff_commits_first'] * len(commit_list))
-    first_time = commit_list[first_idx]['ts']
-    last_idx = round(sim_config['cutoff_commits_last'] * len(commit_list))
-    last_time = commit_list[last_idx]['ts']
-
     now = time.time()
-    ts = rng.randint(first_time, last_time)
-
     master_sha = find_master_commit(ts)['sha']
 
     future_ts = (
         ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
     future_sha = find_master_commit(future_ts)['sha']
 
-    heads = graph.find_all_heads(commit_dict, ts)
     author_counts = graph.count_authors(commit_dict, ts)
 
     def _select(crit_func):
@@ -87,6 +91,8 @@ def run(args, basename, repo, rng):
         for ckey, shas in by_crits.items():
             res['merge_greedy_%s' % ckey] = (
                 simutils.merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_counts))
+            res['accept_greedy_%s' % ckey] = (
+                simutils.accept_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_counts))
             res['topmost_%s' % ckey] = (
                 simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, shas[:max_head_count])
             )
@@ -96,6 +102,7 @@ def run(args, basename, repo, rng):
 
     experiment = {
         'repo': basename,
+        'all_heads': by_crits['depth'],
         'ts': ts,
         'master_sha': master_sha,
         'future_ts': future_ts,

@@ -4,19 +4,6 @@ import diff
 import graph
 
 
-def merge_greedy(tmp_repo, shas):
-    tmp_repo.git.checkout(shas[0], force=True)
-    merged = [shas[0]]
-    for sha in shas[1:]:
-        try:
-            tmp_repo.git.merge(sha)
-        except git.exc.GitCommandError:
-            tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
-            continue
-        merged.append(sha)
-    return merged
-
-
 def get_metadata(commit_dict, sha):
     cinfo = commit_dict[sha]
     return {
@@ -26,7 +13,55 @@ def get_metadata(commit_dict, sha):
     }
 
 
-def merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_counts):
+# Returns true if merge succesful
+def merge_once(tmp_repo, sha):
+    try:
+        tmp_repo.git.merge(sha)
+        return True
+    except git.exc.GitCommandError:
+        tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
+        return False
+
+
+# Testing only atm
+def merge_greedy(tmp_repo, shas):
+    tmp_repo.git.checkout(shas[0], force=True)
+    merged = [shas[0]]
+    for sha in shas[1:]:
+        if merge_once(tmp_repo, sha):
+            merged.append(sha)
+    return merged
+
+
+def merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=merge_once):
+    assert head_counts == sorted(head_counts)
+    hc_it = iter(head_counts)
+    hc = next(hc_it)
+    all_res = []
+    tmp_repo.git.checkout(shas[0], force=True)
+    merged = [shas[0]]
+    for idx, sha in enumerate(shas[1:], start=1):
+        assert idx <= hc
+        if idx == hc:
+            res = {}
+            res['head_count'] = hc
+            res['param'] = hc
+            res['merged_commits'] = merged[:]
+            res['diff'] = diff.eval(future_commit, None)
+            all_res.append(res)
+
+            try:
+                hc = next(hc_it)
+            except StopIteration:
+                break
+
+        if mergefunc(tmp_repo, sha):
+            merged.append(sha)
+
+    return all_res
+
+
+def accept_greedy_diff_all(tmp_repo, future_commit, shas, head_counts):
     assert head_counts == sorted(head_counts)
     hc_it = iter(head_counts)
     hc = next(hc_it)
@@ -51,7 +86,7 @@ def merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_count
         try:
             tmp_repo.git.merge(sha)
         except git.exc.GitCommandError:
-            tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
+            # TODO accept stuff
             continue
         merged.append(sha)
 
