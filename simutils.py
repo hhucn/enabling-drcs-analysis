@@ -26,14 +26,6 @@ def get_metadata(commit_dict, sha):
     }
 
 
-def merge_greedy_diff(tmp_repo, commit_dict, future_commit, shas):
-    merged = merge_greedy(tmp_repo, shas)
-    res = {}
-    res['merged_commits'] = merged
-    res['diff'] = diff.eval(future_commit, None)
-    return res
-
-
 def merge_greedy_diff_all(tmp_repo, commit_dict, future_commit, shas, head_counts):
     assert head_counts == sorted(head_counts)
     hc_it = iter(head_counts)
@@ -72,6 +64,6 @@ def eval_all_straight(tmp_repo, commit_dict, future_commit, shas):
         commit = tmp_repo.commit(sha)
         res = get_metadata(commit_dict, sha)
         res['diff'] = diff.eval(future_commit, commit)
-        res['val'] = res['index'] = i
+        res['param'] = res['index'] = i
         all_res.append(res)
     return all_res

@@ -18,7 +18,7 @@ def eval_results(experiments):
         print('[%d] %s' % (i, e['repo']))
         for k, results in sorted(e['res'].items()):
             best = min(results, key=lambda r: r['diff']['lines'])
-            print(' %-20s: best(%s) %6d out of %3d' % (k, best['val'], best['diff']['lines'], len(results)))
+            print(' %-20s: best(%2d) %6d out of %3d' % (k, best['param'], best['diff']['lines'], len(results)))
 
 def main():
     parser = argparse.ArgumentParser(
