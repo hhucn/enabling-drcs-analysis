@@ -91,6 +91,8 @@ def run(args, basename, repo, rng):
         for ckey, shas in by_crits.items():
             res['merge_greedy_%s' % ckey] = (
                 simutils.merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
+            res['merge_ours_greedy_%s' % ckey] = (
+                simutils.merge_ours_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
             res['accept_greedy_%s' % ckey] = (
                 simutils.accept_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
             res['topmost_%s' % ckey] = (
