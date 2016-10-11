@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import collections
-import random
-import time
 import statistics
-
 
 import sim
 import utils
-
-
-DIRNAME = 'compare_results'
 
 
 def eval_results(experiments):
@@ -39,7 +32,7 @@ def eval_results(experiments):
 def main():
     parser = argparse.ArgumentParser(
         'Compare and display simulation results')
-    args = parser.parse_args()
+    parser.parse_args()
 
     experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
     eval_results(experiments)
