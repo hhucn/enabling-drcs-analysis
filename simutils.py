@@ -34,11 +34,12 @@ def merge_ours(tmp_repo, sha):
 
 def accept_once(tmp_repo, sha):
     try:
-        tmp_repo.git.merge(sha, strategy='ours')
+        tmp_repo.git.merge(sha)
         return True
     except git.exc.GitCommandError:
         fns = list(tmp_repo.index.unmerged_blobs())
         prev_blobs = list(tmp_repo.index.iter_blobs())
+        print('CHECKING OUT')
         tmp_repo.git.execute(['git', 'checkout', '--ours', '--'] + fns)
         remaining_blobs = list(tmp_repo.index.iter_blobs())
         print(tmp_repo.git.execute(['git', 'status']))
