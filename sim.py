@@ -63,6 +63,11 @@ def run(args, basename, repo, rng):
 
     author_counts = graph.count_authors(commit_dict, ts)
 
+    def _select_random():
+        random_heads = list(heads)
+        rng.shuffle(random_heads)
+        return random_heads
+
     def _select(crit_func):
         return sorted(
             heads,
@@ -74,6 +79,7 @@ def run(args, basename, repo, rng):
         'depth': _select(lambda sha: commit_dict[sha]['depth']),
         'size': _select(lambda sha: graph.calc_size(commit_dict, commit_dict[sha])),
         'author': _select(lambda sha: author_counts[commit_dict[sha]['author']]),
+        'random': _select_random(),
     }
 
     head_counts = sim_config['experiments_head_counts']
