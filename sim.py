@@ -31,9 +31,16 @@ def run(args, basename, repo, rng):
     # Determine sensible times
     first_idx = round(sim_config['cutoff_commits_first'] * len(commit_list))
     first_time = commit_list[first_idx]['ts']
-    last_idx = round(sim_config['cutoff_commits_last'] * len(commit_list))
-    last_time = commit_list[last_idx]['ts']
+    max_time = commit_list[-1]['ts']
+    future_duration = 24 * 60 * 60 * sim_config['master_comparison_future_days']
+    last_time = max_time - future_duration
+
+    if last_time < first_time:
+        print('No experiment possible: Time range to small. Ignoring ...')
+        return
+
     ts = rng.randint(first_time, last_time)
+    future_ts = ts + future_duration
 
     heads = graph.find_all_heads(commit_dict, ts)
     if len(heads) < sim_config['min_heads']:
@@ -52,10 +59,6 @@ def run(args, basename, repo, rng):
     now = time.time()
     master_sha = find_master_commit(ts)['sha']
 
-    future_ts = (
-        ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
-    if future_ts >= commit_list[-1]['ts']:
-        raise ValueError('Invalid experiment: future timestamp lies outside range')
     future_sha = find_master_commit(future_ts)['sha']
 
     author_counts = graph.count_authors(commit_dict, ts)
