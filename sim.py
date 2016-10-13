@@ -54,6 +54,8 @@ def run(args, basename, repo, rng):
 
     future_ts = (
         ts + 24 * 60 * 60 * sim_config['master_comparison_future_days'])
+    if future_ts >= commit_list[-1]['ts']:
+        raise ValueError('Invalid experiment: future timestamp lies outside range')
     future_sha = find_master_commit(future_ts)['sha']
 
     author_counts = graph.count_authors(commit_dict, ts)
