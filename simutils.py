@@ -31,11 +31,14 @@ def merge_ours(tmp_repo, sha):
     except git.exc.GitCommandError:
         unmerged_blobs = tmp_repo.index.unmerged_blobs()
         fns = list(unmerged_blobs)
-        for path in fns:
-            print('%s: %r' % (path, unmerged_blobs[path][0]))
-        print(tmp_repo.git.execute(['git', 'status']))
-        tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
-        if list(tmp_repo.index.unmerged_blobs()):
+        give_up = False
+        try:
+            tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
+        except git.exc.GitCommandError:
+            # TODO better: complicated, give up
+            give_up = True
+
+        if give_up or list(tmp_repo.index.unmerged_blobs()):
             tmp_repo.git.execute(['git', 'commit', '-am', 'accept anything open'])
         else:
             tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
