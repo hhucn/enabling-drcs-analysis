@@ -25,13 +25,10 @@ def merge_once(tmp_repo, sha):
 
 def merge_ours(tmp_repo, sha):
     cur_sha = tmp_repo.head.object.hexsha
-    print('%s x %s' % (cur_sha, sha))
     try:
         tmp_repo.git.merge(sha)
         return True
     except git.exc.GitCommandError:
-        tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
-        return
         unmerged_blobs = tmp_repo.index.unmerged_blobs()
         fns = list(unmerged_blobs)
         for path in fns:
