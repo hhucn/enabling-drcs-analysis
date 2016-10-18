@@ -1,7 +1,27 @@
+calculate ranking
+write down ranking
+write down expectations
+
+test_calc_rank
+explore tie
+check that we do actually merge
+plot
+example graphics
+
 parallelize experiments (optionally)
+extend diffing
+actually run 1000 experiments!
 merge with different sizes
 
+with different days than 60
 evaluate whether we can merge using IndexFiles (should be faster)
 download_pulls (downloads references to all pulls)
 merge: only backout partially
 check merge / merge_ours once more
+revive spots
+run with large dataset over night
+think about how to improve
+fix accept (symfony)
+compare against multiple future commits
+compare output future date
+try simple diff by checking out twice? might be faster, but ignore .git

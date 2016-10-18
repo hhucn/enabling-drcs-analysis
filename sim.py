@@ -6,6 +6,7 @@ import random
 import re
 import shutil
 import time
+import traceback
 
 import git
 
@@ -186,7 +187,7 @@ def main():
         for e in run_experiments(args, all_repos):
             experiments.append(e)
     except KeyboardInterrupt:
-        pass
+        traceback.print_exc()
 
     basename = 'experiments'
     fn = utils.calc_filename(basename, dirname=DIRNAME)

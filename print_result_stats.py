@@ -12,11 +12,12 @@ import utils
 def get_candidates(e):
     res = e['res']
     candidates = {}
-    candidates['best'] = min(min(v['diff']['lines'] for v in vals) for vals in res.values())
     for k, v in res.items():
         if k.startswith('merge_') or k.startswith('mours_'):
-            candidates['%s_best' % k] = min(d['diff']['lines'] for d in v)
+            for pval in [2, 5, 10, 20, 50]:
+                candidates['%s_%d' % (k, pval)] = next(d['diff']['lines'] for d in v if d['param'] == pval)
             continue
+
         if k.startswith('topmost_'):
             k = k[len('topmost_'):]
 
@@ -27,28 +28,62 @@ def get_candidates(e):
             candidates['%s_2' % k] = diffs[1]
         if len(v) > 2:
             candidates['%s_last' % k] = diffs[-1]
-        # TODO add median etc.        
 
+    assert all(isinstance(v, int) for v in candidates.values())
     return candidates
 
 
+def calc_rank(candidates):
+    res = {}
+    sorted_c = sorted(candidates.keys(), key=lambda k: candidates[k])
+    it = iter(sorted_c)
+    k = next(it)
+
+    while True:
+        affected_keys = []
+        raw_val = candidates[k]
+        while candidates[k] == raw_val:
+            affected_keys.append(k)
+            try:
+                k = next(it)
+            except StopIteration:
+                k = None
+                break
+
+        start_idx = len(res)
+        end_idx = start_idx + len(affected_keys) - 1
+        for ak in affected_keys:
+            res[ak] = (start_idx + end_idx) / 2
+
+        if k is None:
+            break
+
+    return res
+
+
 def eval_results(experiments):
-    metrics = list(map(get_candidates, experiments))
-    all_ids = sorted(metrics[0].keys())
+    print('%d experiments' % len(experiments))
+    results = list(map(get_candidates, experiments))
+    ranks = list(map(calc_rank, results))
 
-    print('Relative to best result (mean):')
-    mean_vals = {
-        metric_id: statistics.mean(m[metric_id] / m['best'] for m in metrics)
-        for metric_id in all_ids
-    }
-    print(
-        '\n'.join('%-25s: %5s' % (mid, mv)
-        for mid, mv in sorted(mean_vals.items(), key=lambda t: (t[1], t[0]))))
+    metrics = {}
+    for eranks in ranks:
+        for ckey, crank in eranks.items():
+            key_ranks = metrics.setdefault(ckey, [])
+            key_ranks.append(crank)
+
+    print('%d strategies' % len(metrics))
+
+    print('By mean:')
+    means = {mkey: statistics.mean(mranks) for mkey, mranks in metrics.items()}
+    by_mean = sorted(means.keys(), key=lambda k: means[k])
+    for i, mkey in enumerate(by_mean, start=1):
+        print('%2d. %-25s %.2f' % (i, mkey, means[mkey]))
 
 
-    # TODO best strat by number
-    # TODO best strat by average
-    # TODO best strat by mean
+    # How often No. 1?
+    # Mean?
+    # Median rank
 
 
 def main():
