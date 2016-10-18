@@ -136,9 +136,8 @@ def run_experiments(args, all_repos):
         basename = utils.safe_filename(repo_dict['full_name'])
 
         if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-            if args.verbose or args.no_status:
-                print('No commit list for %s, skipping.' % repo_dict['full_name'])
-            return
+            print('No commit list for %s, skipping.' % repo_dict['full_name'])
+            continue
         print('[%d/%d] %s' % (count, n, basename))
 
         path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
