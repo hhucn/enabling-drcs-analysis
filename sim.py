@@ -43,7 +43,7 @@ def run(args, basename, repo, rng):
     ts = rng.randint(first_time, last_time)
     future_ts = ts + future_duration
 
-    heads = graph.find_all_heads(commit_dict, ts)
+    heads = sorted(graph.find_all_heads(commit_dict, ts))
     if len(heads) < sim_config['min_heads']:
         print('Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
         return
@@ -57,7 +57,6 @@ def run(args, basename, repo, rng):
             c = commit_dict[c['parents'][0]]
         return c
 
-    now = time.time()
     master_sha = find_master_commit(ts)['sha']
 
     future_sha = find_master_commit(future_ts)['sha']
@@ -72,7 +71,7 @@ def run(args, basename, repo, rng):
     def _select(crit_func):
         return sorted(
             heads,
-            key=crit_func,
+            key=lambda sha: (crit_func(sha), sha),
             reverse=True)
 
     by_crits = {
@@ -86,7 +85,7 @@ def run(args, basename, repo, rng):
     head_counts = sim_config['experiments_head_counts']
     max_head_count = max(head_counts)
 
-    suffix = '-%s-%d' % (utils.timestr(now), os.getpid())
+    suffix = '-%s-%d' % (utils.timestr(time.time()), os.getpid())
     tmp_repo_path = utils.calc_filename(
         basename, dirname=TMP_REPOS, suffix=suffix)
     assert basename in tmp_repo_path
@@ -100,13 +99,11 @@ def run(args, basename, repo, rng):
 
         res['master'] = simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, [master_sha])
 
-        for ckey, shas in by_crits.items():
+        for ckey, shas in sorted(by_crits.items()):
             res['merge_greedy_%s' % ckey] = (
                 simutils.merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
             res['mours_greedy_%s' % ckey] = (
                 simutils.merge_ours_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
-            #res['accept_greedy_%s' % ckey] = (
-            #    simutils.accept_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
             res['topmost_%s' % ckey] = (
                 simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, shas[:max_head_count])
             )

@@ -24,33 +24,24 @@ def merge_once(tmp_repo, sha):
 
 
 def merge_ours(tmp_repo, sha):
-    try:
-        tmp_repo.git.merge(sha, 'ours')
-        return True
-    except git.exc.GitCommandError:
-        tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
-        return False
-
-
-def accept_once(tmp_repo, sha):
+    cur_sha = tmp_repo.head.object.hexsha
+    print('%s x %s' % (cur_sha, sha))
     try:
         tmp_repo.git.merge(sha)
         return True
     except git.exc.GitCommandError:
-        fns = list(tmp_repo.index.unmerged_blobs())
-        prev_blobs = list(tmp_repo.index.iter_blobs())
-        print('CHECKING OUT')
-        tmp_repo.git.execute(['git', 'checkout', '--ours', '--'] + fns)
-        remaining_blobs = list(tmp_repo.index.iter_blobs())
-        print(tmp_repo.git.execute(['git', 'status']))
-        print(tmp_repo.working_dir)
-        import time
-        time.sleep(10000)
-        print('remaingin_blobs: %r' % remaining_blobs)
-        assert len(prev_blobs) > len(remaining_blobs)
-        tmp_repo.git.execute(['git', 'commit', '-am', 'accept anything open'])
-
         tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
+        return
+        unmerged_blobs = tmp_repo.index.unmerged_blobs()
+        fns = list(unmerged_blobs)
+        for path in fns:
+            print('%s: %r' % (path, unmerged_blobs[path][0]))
+        print(tmp_repo.git.execute(['git', 'status']))
+        tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
+        if list(tmp_repo.index.unmerged_blobs()):
+            tmp_repo.git.execute(['git', 'commit', '-am', 'accept anything open'])
+        else:
+            tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
         return False
 
 
@@ -90,10 +81,6 @@ def merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=
             merged.append(sha)
 
     return all_res
-
-
-def accept_greedy_diff_all(tmp_repo, future_commit, shas, head_counts):
-    return merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=accept_once)
 
 
 def merge_ours_greedy_diff_all(tmp_repo, future_commit, shas, head_counts):
