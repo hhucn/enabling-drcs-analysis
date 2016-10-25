@@ -178,7 +178,7 @@ def run_experiments(args, all_repos):
         } for i in range(len(res), n)]
 
         with multiprocessing.Pool() as pool:
-            map_func = pool.imap if is_parallel else map
+            map_func = pool.imap_unordered if is_parallel else map
             try:
                 new_res = map_func(run, all_params)
                 for nr in new_res:

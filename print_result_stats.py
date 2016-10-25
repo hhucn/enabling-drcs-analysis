@@ -3,6 +3,7 @@ from __future__ import division
 
 import argparse
 import collections
+import re
 import statistics
 
 import sim
@@ -13,21 +14,25 @@ def get_candidates(e, diff_key):
     res = e['res']
     candidates = {}
     for k, v in res.items():
+        m = re.match(r'^(?P<type>[a-z]+)_(?:greedy_)?(?P<crit>[a-z]+)$', k)
+        if m:
+            outk = '%(crit)s_%(type)s' % m.groupdict() if 'type' != 'topmost' else '%(crit)s'
+        else:
+            assert k in ('master',)
+            outk = k
+
         if k.startswith('merge_') or k.startswith('mours_'):
             for pval in [2, 5, 10, 20, 50]:
-                candidates['%s_%d' % (k, pval)] = next(d['diff'][diff_key] for d in v if d['param'] == pval)
+                candidates['%s_%d' % (outk, pval)] = next(d['diff'][diff_key] for d in v if d['param'] == pval)
             continue
-
-        if k.startswith('topmost_'):
-            k = k[len('topmost_'):]
 
         diffs = [obj['diff'][diff_key] for obj in v]
 
-        candidates['%s_1' % k] = diffs[0]
+        candidates['%s_1' % outk] = diffs[0]
         if len(v) > 1:
-            candidates['%s_2' % k] = diffs[1]
+            candidates['%s_2' % outk] = diffs[1]
         if len(v) > 2:
-            candidates['%s_%d' % (k, len(v))] = diffs[-1]
+            candidates['%s_%d' % (outk, len(v))] = diffs[-1]
 
     assert all(isinstance(v, int) for v in candidates.values())
     return candidates
@@ -62,23 +67,33 @@ def calc_rank(candidates):
 
 
 def eval_results(experiments, diff_key):
-    print('%d experiments (evaluated by %s)' % (len(experiments), diff_key))
     results = [get_candidates(e, diff_key=diff_key) for e in experiments]
     ranks = list(map(calc_rank, results))
 
-    metrics = {}
+    strategy_ranks = {}
     for eranks in ranks:
         for ckey, crank in eranks.items():
-            key_ranks = metrics.setdefault(ckey, [])
+            key_ranks = strategy_ranks.setdefault(ckey, [])
             key_ranks.append(crank)
 
-    print('%d strategies' % len(metrics))
-
-    print('By mean:')
-    means = {mkey: statistics.mean(mranks) for mkey, mranks in metrics.items()}
+    means = {mkey: statistics.mean(mranks) for mkey, mranks in strategy_ranks.items()}
     by_mean = sorted(means.keys(), key=lambda k: means[k])
-    for i, mkey in enumerate(by_mean, start=1):
-        print('%2d. %-25s %.2f' % (i, mkey, means[mkey]))
+    return {
+        'experiment_count': len(experiments),
+        'strategy_count': len(strategy_ranks),
+        'diff_key': diff_key,
+        'by_mean': by_mean,
+        'means': means,
+    }
+
+def print_results(experiments):
+    for diff_key in ('lines', 'len'):
+        stats = eval_results(experiments, diff_key)
+        print('%d experiments (evaluated by %s)' % (stats['experiment_count'], diff_key))
+        print('%d strategies' % stats['strategy_count'])
+        print('By mean:')
+        for i, mkey in enumerate(stats['by_mean'], start=1):
+            print('%2d. %-25s %.2f' % (i, mkey, stats['means'][mkey]))
 
     # How often No. 1?
     # Mean?
@@ -91,8 +106,7 @@ def main():
     parser.parse_args()
 
     experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
-    eval_results(experiments, 'lines')
-    eval_results(experiments, 'len')
+    print_results(experiments)
 
 
 if __name__ == '__main__':
