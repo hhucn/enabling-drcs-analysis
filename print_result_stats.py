@@ -80,7 +80,6 @@ def eval_results(experiments):
     for i, mkey in enumerate(by_mean, start=1):
         print('%2d. %-25s %.2f' % (i, mkey, means[mkey]))
 
-
     # How often No. 1?
     # Mean?
     # Median rank

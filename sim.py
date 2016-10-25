@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import multiprocessing
 import os
 import random
 import re
@@ -21,7 +22,7 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
-def run(args, repo_dict, seed):
+def run(config, repo_dict, seed):
     rng = random.Random(seed)
     basename = utils.safe_filename(repo_dict['full_name'])
 
@@ -32,9 +33,7 @@ def run(args, repo_dict, seed):
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
 
-    eres = run(args, basename, repo, seed):
-
-    sim_config = args.config['sim']
+    sim_config = config['sim']
     utils.ensure_datadir(TMP_REPOS)
 
     commit_list_data = utils.read_data(basename, gen_commit_lists.DIRNAME)
@@ -120,7 +119,7 @@ def run(args, repo_dict, seed):
                 simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, shas[:max_head_count])
             )
     finally:
-        if not args.keep:
+        if not config['args_keep']:
             shutil.rmtree(tmp_repo_path)
 
     experiment = {
@@ -135,19 +134,49 @@ def run(args, repo_dict, seed):
     }
     return experiment
 
+def _run(params):
+    repo_dict = params['repo_dict']
+    if params['is_parallel']:
+        cp = multiprocessing.current_process()
+        worker_id = cp.name
+        m = re.match(r'^[a-zA-Z]+-(?P<numeric>[0-9]+)$', worker_id)
+        if m:
+            worker_id = m.group('numeric')
+        print('[%d/%d@%s] %s' % (params['idx'], params['n'], worker_id, repo_dict['full_name']))
+    else:
+        print('[%d/%d] %s' % (params['idx'], params['n'], repo_dict['full_name']))
+    return run(config=params['config'], repo_dict=repo_dict, seed=params['seed'])
 
 def run_experiments(args, all_repos):
     rng = random.Random(0)
     n = args.n
-    count = 0
     res = []
-    for count in range(n):
-        repo_dict = rng.choice(all_repos)
-        seed = rng.random()
 
-        eres = run_experiment_on_repo(repo_dict, seed)
-        res.append(eres)
-        print('[%d/%d] %s' % (count, n, basename))
+    is_parallel = args.parallel
+
+    while len(res) < n:
+        all_params = [{
+            'config': args.config,
+            'repo_dict': rng.choice(all_repos),
+            'seed': rng.random(),
+            'is_parallel': is_parallel,
+            'idx': i,
+            'n': n,
+        } for i in range(len(res), n)]
+
+        if is_parallel:
+            with multiprocessing.Pool() as pool:
+                new_res = pool.imap(_run, all_params)
+                for nr in new_res:
+                    if nr:
+                        res.append(nr)
+        else:
+            new_res = map(_run, all_params)
+            for nr in new_res:
+                if nr:
+                    res.append(nr)
+
+    return res
 
 
 def main():
@@ -158,13 +187,17 @@ def main():
         help='Keep temporary repositories'
     )
     parser.add_argument(
+        '-p', '--parallel', action='store_true',
+        help='Run in parallel'
+    )
+    parser.add_argument(
         '-f', '--filter',
         metavar='REGEXP', type=re.compile,
         help='Filter by repository fullname (regular expressions)')
     parser.add_argument(
-        '-n', '--experiment-count', default=1000,
+        '-n', '--experiment-count', default=100,
         metavar='COUNT', type=int, dest='n',
-        help='Number of experiments to perform')
+        help='Number of experiments to perform (default: %(default)s)')
     args = parser.parse_args()
 
     config = utils.read_config()
@@ -172,6 +205,7 @@ def main():
 
     utils.ensure_datadir(DIRNAME)
     args.config = config
+    config['args_keep'] = args.keep
 
     def _should_visit(repo_dict):
         if repo_dict['full_name'] in ignored_repos:
