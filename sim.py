@@ -21,7 +21,19 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
-def run(args, basename, repo, rng):
+def run(args, repo_dict, seed):
+    rng = random.Random(seed)
+    basename = utils.safe_filename(repo_dict['full_name'])
+
+    if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
+        print('No commit list for %s, skipping.' % repo_dict['full_name'])
+        return
+
+    path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
+    repo = git.repo.Repo(path)
+
+    eres = run(args, basename, repo, seed):
+
     sim_config = args.config['sim']
     utils.ensure_datadir(TMP_REPOS)
 
@@ -121,29 +133,21 @@ def run(args, basename, repo, rng):
         'res': res,
         'config': sim_config,
     }
-    yield experiment
+    return experiment
 
 
 def run_experiments(args, all_repos):
     rng = random.Random(0)
     n = args.n
     count = 0
-    while count < n:
+    res = []
+    for count in range(n):
         repo_dict = rng.choice(all_repos)
+        seed = rng.random()
 
-        basename = utils.safe_filename(repo_dict['full_name'])
-
-        if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-            print('No commit list for %s, skipping.' % repo_dict['full_name'])
-            continue
+        eres = run_experiment_on_repo(repo_dict, seed)
+        res.append(eres)
         print('[%d/%d] %s' % (count, n, basename))
-
-        path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
-        repo = git.repo.Repo(path)
-
-        for e in run(args, basename, repo, rng):
-            count += 1
-            yield e
 
 
 def main():
