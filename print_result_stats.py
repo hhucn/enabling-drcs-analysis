@@ -9,25 +9,25 @@ import sim
 import utils
 
 
-def get_candidates(e):
+def get_candidates(e, diff_key):
     res = e['res']
     candidates = {}
     for k, v in res.items():
         if k.startswith('merge_') or k.startswith('mours_'):
             for pval in [2, 5, 10, 20, 50]:
-                candidates['%s_%d' % (k, pval)] = next(d['diff']['lines'] for d in v if d['param'] == pval)
+                candidates['%s_%d' % (k, pval)] = next(d['diff'][diff_key] for d in v if d['param'] == pval)
             continue
 
         if k.startswith('topmost_'):
             k = k[len('topmost_'):]
 
-        diffs = [obj['diff']['lines'] for obj in v]
+        diffs = [obj['diff'][diff_key] for obj in v]
 
         candidates['%s_1' % k] = diffs[0]
         if len(v) > 1:
             candidates['%s_2' % k] = diffs[1]
         if len(v) > 2:
-            candidates['%s_last' % k] = diffs[-1]
+            candidates['%s_%d' % (k, len(v))] = diffs[-1]
 
     assert all(isinstance(v, int) for v in candidates.values())
     return candidates
@@ -61,9 +61,9 @@ def calc_rank(candidates):
     return res
 
 
-def eval_results(experiments):
-    print('%d experiments' % len(experiments))
-    results = list(map(get_candidates, experiments))
+def eval_results(experiments, diff_key):
+    print('%d experiments (evaluated by %s)' % (len(experiments), diff_key))
+    results = [get_candidates(e, diff_key=diff_key) for e in experiments]
     ranks = list(map(calc_rank, results))
 
     metrics = {}
@@ -91,7 +91,8 @@ def main():
     parser.parse_args()
 
     experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
-    eval_results(experiments)
+    eval_results(experiments, 'lines')
+    eval_results(experiments, 'len')
 
 
 if __name__ == '__main__':
