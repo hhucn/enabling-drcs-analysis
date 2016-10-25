@@ -39,9 +39,13 @@ def merge_ours(tmp_repo, sha):
             give_up = True
 
         if give_up or list(tmp_repo.index.unmerged_blobs()):
-            tmp_repo.git.execute(['git', 'commit', '-am', 'accept anything open'])
-        else:
-            tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
+            try:
+                tmp_repo.git.execute(['git', 'commit', '-am', 'accept anything open'])
+                return True
+            except git.exc.GitCommandError:
+                pass
+
+        tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
         return False
 
 

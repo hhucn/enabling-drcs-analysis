@@ -1,8 +1,7 @@
 write down expectations
 
-merge is not reproducible!
-test merge_ours
-test_calc_rank
+correct mours
+ftest_calc_rank
 explore tie
 check that we do actually merge
 plot
