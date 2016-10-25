@@ -1,16 +1,10 @@
-write down expectations
+plot histogramm
+plot by hunks
 
-correct mours
 ftest_calc_rank
-explore tie
-check that we do actually merge
-plot
 example graphics
-
-parallelize experiments (optionally)
-extend diffing
+correct mours
 actually run 1000 experiments!
-merge with different sizes
 
 with different days than 60
 evaluate whether we can merge using IndexFiles (should be faster)

@@ -22,12 +22,34 @@ DIRNAME = 'sim_results'
 TMP_REPOS = 'sim_tmp'
 
 
-def run(config, repo_dict, seed):
+def print_log(is_parallel, msg):
+    if is_parallel:
+        cp = multiprocessing.current_process()
+        worker_id = cp.name
+        m = re.match(r'^[a-zA-Z]+-(?P<numeric>[0-9]+)$', worker_id)
+        if m:
+            worker_id = m.group('numeric')
+        print('{%s} %s' % (worker_id, msg))
+    else:
+        print('%s' % msg)
+
+
+def run(params):
+    repo_dict = params['repo_dict']
+    config = params['config']
+    seed = params['seed']
+    is_parallel = params['is_parallel']
+
+    msg = '[%d/%d] %s' % (params['idx'], params['n'], repo_dict['full_name'])
+    print_log(is_parallel, msg)
+
+    start_time = time.perf_counter()
+
     rng = random.Random(seed)
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-        print('No commit list for %s, skipping.' % repo_dict['full_name'])
+        print_log(is_parallel, 'No commit list for %s, skipping.' % repo_dict['full_name'])
         return
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
@@ -48,7 +70,7 @@ def run(config, repo_dict, seed):
     last_time = max_time - future_duration
 
     if last_time < first_time:
-        print('No experiment possible: Time range to small. Ignoring ...')
+        print_log(is_parallel, 'No experiment possible: Time range to small. Ignoring ...')
         return
 
     ts = rng.randint(first_time, last_time)
@@ -56,7 +78,7 @@ def run(config, repo_dict, seed):
 
     heads = sorted(graph.find_all_heads(commit_dict, ts))
     if len(heads) < sim_config['min_heads']:
-        print('Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
+        print_log(is_parallel, 'Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
         return
 
     graph.calc_children(commit_dict)
@@ -122,6 +144,8 @@ def run(config, repo_dict, seed):
         if not config['args_keep']:
             shutil.rmtree(tmp_repo_path)
 
+    duration = time.perf_counter() - start_time
+
     experiment = {
         'repo': basename,
         'all_heads': by_crits['depth'],
@@ -131,21 +155,10 @@ def run(config, repo_dict, seed):
         'future_sha': future_sha,
         'res': res,
         'config': sim_config,
+        'duration': duration,
     }
     return experiment
 
-def _run(params):
-    repo_dict = params['repo_dict']
-    if params['is_parallel']:
-        cp = multiprocessing.current_process()
-        worker_id = cp.name
-        m = re.match(r'^[a-zA-Z]+-(?P<numeric>[0-9]+)$', worker_id)
-        if m:
-            worker_id = m.group('numeric')
-        print('[%d/%d@%s] %s' % (params['idx'], params['n'], worker_id, repo_dict['full_name']))
-    else:
-        print('[%d/%d] %s' % (params['idx'], params['n'], repo_dict['full_name']))
-    return run(config=params['config'], repo_dict=repo_dict, seed=params['seed'])
 
 def run_experiments(args, all_repos):
     rng = random.Random(0)
@@ -164,17 +177,17 @@ def run_experiments(args, all_repos):
             'n': n,
         } for i in range(len(res), n)]
 
-        if is_parallel:
-            with multiprocessing.Pool() as pool:
-                new_res = pool.imap(_run, all_params)
+        with multiprocessing.Pool() as pool:
+            map_func = pool.imap if is_parallel else map
+            try:
+                new_res = map_func(run, all_params)
                 for nr in new_res:
                     if nr:
                         res.append(nr)
-        else:
-            new_res = map(_run, all_params)
-            for nr in new_res:
-                if nr:
-                    res.append(nr)
+                        print('Completed %d/%d experiments' % (len(res), n))
+            except KeyboardInterrupt:
+                traceback.print_exc()
+                break
 
     return res
 
@@ -218,11 +231,8 @@ def main():
 
     all_repos = list(filter(_should_visit, utils.read_data('list')))
     experiments = []
-    try:
-        for e in run_experiments(args, all_repos):
-            experiments.append(e)
-    except KeyboardInterrupt:
-        traceback.print_exc()
+    for e in run_experiments(args, all_repos):
+        experiments.append(e)
 
     basename = 'experiments'
     fn = utils.calc_filename(basename, dirname=DIRNAME)
