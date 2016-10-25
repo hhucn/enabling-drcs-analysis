@@ -16,7 +16,10 @@ def get_candidates(e, diff_key):
     for k, v in res.items():
         m = re.match(r'^(?P<type>[a-z]+)_(?:greedy_)?(?P<crit>[a-z]+)$', k)
         if m:
-            outk = '%(crit)s_%(type)s' % m.groupdict() if 'type' != 'topmost' else '%(crit)s'
+            if m.group('type') == 'topmost':
+                outk = m.group('crit')
+            else:
+                outk = '%(crit)s_%(type)s' % m.groupdict()
         else:
             assert k in ('master',)
             outk = k
@@ -78,22 +81,43 @@ def eval_results(experiments, diff_key):
 
     means = {mkey: statistics.mean(mranks) for mkey, mranks in strategy_ranks.items()}
     by_mean = sorted(means.keys(), key=lambda k: means[k])
+
+    medians = {mkey: statistics.median(mranks) for mkey, mranks in strategy_ranks.items()}
+    by_median = sorted(medians.keys(), key=lambda k: medians[k])
+
     return {
         'experiment_count': len(experiments),
         'strategy_count': len(strategy_ranks),
         'diff_key': diff_key,
         'by_mean': by_mean,
         'means': means,
+        'by_median': by_median,
+        'medians': medians,
     }
 
-def print_results(experiments):
+def print_results(args, experiments):
+    all_stats = {}
     for diff_key in ('lines', 'len'):
-        stats = eval_results(experiments, diff_key)
-        print('%d experiments (evaluated by %s)' % (stats['experiment_count'], diff_key))
-        print('%d strategies' % stats['strategy_count'])
-        print('By mean:')
-        for i, mkey in enumerate(stats['by_mean'], start=1):
-            print('%2d. %-25s %.2f' % (i, mkey, stats['means'][mkey]))
+        all_stats[diff_key] = eval_results(experiments, diff_key)
+
+    if args.latex:
+        print('\\begin{tabular}[here]{l|rr|rr}')
+        print('Strategy & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by lines}}$} & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} \\\\ \\hline')
+        for i, mkey in enumerate(all_stats['lines']['by_mean']):
+            print('%s & %d. & %.2f & %d. & %.2f \\\\' % (
+                mkey.replace('_', '\\_'),
+                i + 1,
+                all_stats['lines']['means'][mkey],
+                all_stats['len']['by_mean'].index(mkey) + 1,
+                all_stats['len']['means'][mkey]))
+        print('\\end{tabular}')
+    else:
+        for k, stats in sorted(all_stats.items()):
+            print('%d experiments (evaluated by %s)' % (stats['experiment_count'], diff_key))
+            print('%d strategies' % stats['strategy_count'])
+            print('By mean:')
+            for i, mkey in enumerate(stats['by_mean'], start=1):
+                print('%2d. %-25s %.2f' % (i, mkey, stats['means'][mkey]))
 
     # How often No. 1?
     # Mean?
@@ -103,10 +127,11 @@ def print_results(experiments):
 def main():
     parser = argparse.ArgumentParser(
         'Print out overall statistics for stats')
-    parser.parse_args()
+    parser.add_argument('--latex', action='store_true', help='Output LaTeX')
+    args = parser.parse_args()
 
     experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
-    print_results(experiments)
+    print_results(args, experiments)
 
 
 if __name__ == '__main__':
