@@ -34,8 +34,10 @@ def get_candidates(e, diff_key):
         candidates['%s_1' % outk] = diffs[0]
         if len(v) > 1:
             candidates['%s_2' % outk] = diffs[1]
-        if len(v) > 2:
-            candidates['%s_%d' % (outk, len(v))] = diffs[-1]
+        if len(v) > 10:
+            candidates['%s_%d' % (outk, 10)] = diffs[10]
+        if len(v) > 50:
+            candidates['%s_%d' % (outk, 50)] = diffs[50]
 
     assert all(isinstance(v, int) for v in candidates.values())
     return candidates

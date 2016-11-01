@@ -18,3 +18,5 @@ fix accept (symfony)
 compare against multiple future commits
 compare output future date
 try simple diff by checking out twice? might be faster, but ignore .git
+
+p test?
