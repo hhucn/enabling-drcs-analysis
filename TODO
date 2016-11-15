@@ -1,10 +1,21 @@
+better labels for graphic
+im zentralen Fall geht es nicht
+wir müssen anzeigen
+muss automatisiert werden
+verständnis entwickeln
+statt human mergen => anzeige
+voting nach ganz hinten
+consensus demokratie nach hinten
+create glossary
+
 plot histogramm
 plot by hunks
 
+inform how founded our choices were
 ftest_calc_rank
 example graphics
 correct mours
-actually run 1000 experiments!
+actually run 1000 experiments on EC2!
 
 with different days than 60
 evaluate whether we can merge using IndexFiles (should be faster)
@@ -19,4 +30,3 @@ compare against multiple future commits
 compare output future date
 try simple diff by checking out twice? might be faster, but ignore .git
 
-p test?

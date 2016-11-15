@@ -10,6 +10,27 @@ import sim
 import utils
 
 
+IDXS = [0, 1, 4, 9, 49]
+HUMAN_NAMES = {
+    'master': 'master',
+    'ts': 'timestamp: {num}. newest',
+    'depth': 'depth: {num}. largest',
+    'size': 'size: {num}. largest',
+    'author': 'author: {num}. most prominent',
+    'ts_mours': 'timestamp/partial merging: top {num}',
+    'depth_mours': 'depth/partial merging: top {num}',
+    'size_mours': 'size/partial merging: top {num}',
+    'author_mours': 'author/partial merging: top {num}',
+    'ts_merge': 'timestamp/merged: top {num}',
+    'depth_merge': 'depth/merged: top {num}',
+    'size_merge': 'size/merged: top {num}',
+    'author_merge': 'author/merged: top {num}',
+    'topmost_random': 'random',
+    'random_merge': 'random/merged: {num} commits',
+    'random_mours': 'random/partial merging: {num} commits',
+}
+
+
 def get_candidates(e, diff_key):
     res = e['res']
     candidates = {}
@@ -28,16 +49,15 @@ def get_candidates(e, diff_key):
             for pval in [2, 5, 10, 20, 50]:
                 candidates['%s_%d' % (outk, pval)] = next(d['diff'][diff_key] for d in v if d['param'] == pval)
             continue
+        if k == 'topmost_random':
+            candidates['%s_0' % (k)] = next(d['diff'][diff_key] for d in v)
+            continue
 
         diffs = [obj['diff'][diff_key] for obj in v]
 
-        candidates['%s_1' % outk] = diffs[0]
-        if len(v) > 1:
-            candidates['%s_2' % outk] = diffs[1]
-        if len(v) > 10:
-            candidates['%s_%d' % (outk, 10)] = diffs[10]
-        if len(v) > 50:
-            candidates['%s_%d' % (outk, 50)] = diffs[50]
+        for idx in IDXS:
+            if len(v) > idx:
+                candidates['%s_%d' % (outk, idx+1)] = diffs[idx]
 
     assert all(isinstance(v, int) for v in candidates.values())
     return candidates
@@ -106,8 +126,10 @@ def print_results(args, experiments):
         print('\\begin{tabular}[here]{l|rr|rr}')
         print('Strategy & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by lines}}$} & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} \\\\ \\hline')
         for i, mkey in enumerate(all_stats['lines']['by_mean']):
+            skey, _, num = mkey.rpartition('_')
+            mname = HUMAN_NAMES[skey].replace('{num}', num)
             print('%s & %d. & %.2f & %d. & %.2f \\\\' % (
-                mkey.replace('_', '\\_'),
+                mname.replace('_', '\\_'),
                 i + 1,
                 all_stats['lines']['means'][mkey],
                 all_stats['len']['by_mean'].index(mkey) + 1,
