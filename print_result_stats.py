@@ -5,6 +5,7 @@ import argparse
 import collections
 import re
 import statistics
+import sys
 
 import sim
 import utils
@@ -17,17 +18,17 @@ HUMAN_NAMES = {
     'depth': 'depth: {num}. largest',
     'size': 'size: {num}. largest',
     'author': 'author: {num}. most prominent',
-    'ts_mours': 'timestamp/partial merging: top {num}',
-    'depth_mours': 'depth/partial merging: top {num}',
-    'size_mours': 'size/partial merging: top {num}',
-    'author_mours': 'author/partial merging: top {num}',
+    'ts_mours': 'timestamp/partial merge: top {num}',
+    'depth_mours': 'depth/partial merge: top {num}',
+    'size_mours': 'size/partial merge: top {num}',
+    'author_mours': 'author/partial merge: top {num}',
     'ts_merge': 'timestamp/merged: top {num}',
     'depth_merge': 'depth/merged: top {num}',
     'size_merge': 'size/merged: top {num}',
     'author_merge': 'author/merged: top {num}',
     'topmost_random': 'random',
     'random_merge': 'random/merged: {num} commits',
-    'random_mours': 'random/partial merging: {num} commits',
+    'random_mours': 'random/partial merge: {num} commits',
 }
 
 
@@ -125,7 +126,8 @@ def print_results(args, experiments):
     if args.latex:
         print('\\begin{tabular}[here]{l|rr|rr}')
         print('Strategy & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by lines}}$} & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} \\\\ \\hline')
-        for i, mkey in enumerate(all_stats['lines']['by_mean']):
+        rows = all_stats['lines']['by_mean']
+        for i, mkey in enumerate(rows):
             skey, _, num = mkey.rpartition('_')
             mname = HUMAN_NAMES[skey].replace('{num}', num)
             print('%s & %d. & %.2f & %d. & %.2f \\\\' % (
@@ -135,6 +137,7 @@ def print_results(args, experiments):
                 all_stats['len']['by_mean'].index(mkey) + 1,
                 all_stats['len']['means'][mkey]))
         print('\\end{tabular}')
+        sys.stderr.write('printed %r rows\n' % len(rows))
     else:
         for k, stats in sorted(all_stats.items()):
             print('%d experiments (evaluated by %s)' % (stats['experiment_count'], diff_key))
