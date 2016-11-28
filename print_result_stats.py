@@ -12,22 +12,22 @@ import utils
 
 IDXS = [0, 1, 4, 9, 49]
 HUMAN_NAMES = {
-    'master': 'master & pick & 1',
-    'ts': 'timestamp & pick & {num}',
-    'depth': 'depth & pick & {num}',
-    'size': 'size & pick & {num}',
-    'author': 'author & pick & {num}',
-    'ts_mours': 'timestamp & partial merge & {num}',
-    'depth_mours': 'depth & partial merge & {num}',
-    'size_mours': 'size & partial merge & {num}',
-    'author_mours': 'author & partial merge & {num}',
-    'ts_merge': 'timestamp & merged & {num}',
-    'depth_merge': 'depth & merged & {num}',
-    'size_merge': 'size & merged & {num}',
-    'author_merge': 'author & merged & {num}',
-    'topmost_random': 'random',
-    'random_merge': 'random & merged & {num}',
-    'random_mours': 'random & partial merge & {num}',
+    'master': 'master & 1 & pick',
+    'ts': 'timestamp & {num} & pick',
+    'depth': 'depth & {num} & pick',
+    'size': 'size & {num} & pick',
+    'author': 'author & {num} & pick',
+    'ts_mours': 'timestamp & {num} & partial merge',
+    'depth_mours': 'depth & {num} & partial merge',
+    'size_mours': 'size & {num} & partial merge',
+    'author_mours': 'author & {num} & partial merge',
+    'ts_merge': 'timestamp & {num} & merged',
+    'depth_merge': 'depth & {num} & merged',
+    'size_merge': 'size & {num} & merged',
+    'author_merge': 'author & {num} & merged',
+    'topmost_random': 'random & 1 & pick',
+    'random_merge': 'random & {num} & merged',
+    'random_mours': 'random & {num} & partial merge',
 }
 
 
@@ -126,8 +126,8 @@ def print_results(args, experiments):
         all_stats[diff_key] = eval_results(experiments, idx, diff_key)
 
     if args.latex:
-        print('\\begin{tabular}[here]{llr|rr|rr}')
-        print('Criterion & Strategy & Top & \multicolumn{2}{c|}' +
+        print('\\begin{tabular}[here]{lrl|rr|rr}')
+        print('Criterion & Top & Strategy & \multicolumn{2}{c|}' +
               '{$\\overline{\mbox{pos. by lines}}$} & ' +
               '\multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} ' +
               '\\\\ \\hline')

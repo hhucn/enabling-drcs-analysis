@@ -1,20 +1,14 @@
-reenable table
-klarer erklären was a/b/c bedeutet
-Tabelle Auftrennen (fix first)
-note 60d
-
+write out summary
+write out future work
 other suggested changes
-	s/merge voting/commit voting
 	patch algebra einführen
-	verbose commit voting
 	explain implementation in more details
-	write out summary
-    write out future work
+	verbose commit voting
 send martin
 
 
 
-handle rate limit
+handle rate limit by waiting
 code 30 days
 amazon hochladen
 talk about confidence in paper
