@@ -243,8 +243,9 @@ def main():
 
     basename = 'experiments'
     fn = utils.calc_filename(basename, dirname=DIRNAME)
-    print('Writing %d experiments to %s ...' % (len(experiments), fn))
-    utils.write_data(basename, experiments, dirname=DIRNAME)
+    if experiments:
+        print('Writing %d experiments to %s ...' % (len(experiments), fn))
+        utils.write_data(basename, experiments, dirname=DIRNAME)
 
 
 if __name__ == '__main__':

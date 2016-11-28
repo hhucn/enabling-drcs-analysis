@@ -12,26 +12,26 @@ import utils
 
 IDXS = [0, 1, 4, 9, 49]
 HUMAN_NAMES = {
-    'master': 'master',
-    'ts': 'timestamp: {num}. newest',
-    'depth': 'depth: {num}. largest',
-    'size': 'size: {num}. largest',
-    'author': 'author: {num}. most prominent',
-    'ts_mours': 'timestamp/partial merge: top {num}',
-    'depth_mours': 'depth/partial merge: top {num}',
-    'size_mours': 'size/partial merge: top {num}',
-    'author_mours': 'author/partial merge: top {num}',
-    'ts_merge': 'timestamp/merged: top {num}',
-    'depth_merge': 'depth/merged: top {num}',
-    'size_merge': 'size/merged: top {num}',
-    'author_merge': 'author/merged: top {num}',
+    'master': 'master & pick & 1',
+    'ts': 'timestamp & pick & {num}',
+    'depth': 'depth & pick & {num}',
+    'size': 'size & pick & {num} &',
+    'author': 'author & pick & {num}',
+    'ts_mours': 'timestamp & partial merge & {num}',
+    'depth_mours': 'depth & partial merge & {num}',
+    'size_mours': 'size & partial merge & {num}',
+    'author_mours': 'author & partial merge & {num}',
+    'ts_merge': 'timestamp & merged & {num}',
+    'depth_merge': 'depth & merged & {num}',
+    'size_merge': 'size & merged & {num}',
+    'author_merge': 'author & merged & {num}',
     'topmost_random': 'random',
-    'random_merge': 'random/merged: {num} commits',
-    'random_mours': 'random/partial merge: {num} commits',
+    'random_merge': 'random & merged & {num}',
+    'random_mours': 'random & partial merge & {num}',
 }
 
 
-def get_candidates(e, diff_key):
+def get_candidates(e, diff_idx, diff_key):
     res = e['res']
     candidates = {}
     for k, v in res.items():
@@ -47,13 +47,13 @@ def get_candidates(e, diff_key):
 
         if k.startswith('merge_') or k.startswith('mours_'):
             for pval in [2, 5, 10, 20, 50]:
-                candidates['%s_%d' % (outk, pval)] = next(d['diff'][diff_key] for d in v if d['param'] == pval)
+                candidates['%s_%d' % (outk, pval)] = next(d['diffs'][diff_idx][diff_key] for d in v if d['param'] == pval)
             continue
         if k == 'topmost_random':
-            candidates['%s_0' % (k)] = next(d['diff'][diff_key] for d in v)
+            candidates['%s_0' % (k)] = next(d['diffs'][diff_idx][diff_key] for d in v)
             continue
 
-        diffs = [obj['diff'][diff_key] for obj in v]
+        diffs = [obj['diffs'][diff_idx][diff_key] for obj in v]
 
         for idx in IDXS:
             if len(v) > idx:
@@ -91,8 +91,8 @@ def calc_rank(candidates):
     return res
 
 
-def eval_results(experiments, diff_key):
-    results = [get_candidates(e, diff_key=diff_key) for e in experiments]
+def eval_results(experiments, diff_idx, diff_key):
+    results = [get_candidates(e, diff_idx=diff_idx, diff_key=diff_key) for e in experiments]
     ranks = list(map(calc_rank, results))
 
     strategy_ranks = {}
@@ -119,13 +119,15 @@ def eval_results(experiments, diff_key):
 
 
 def print_results(args, experiments):
+    idx = next(i for i, f in enumerate(experiments[0]['futures']) if f['days'] == args.days)
+
     all_stats = {}
     for diff_key in ('lines', 'len'):
-        all_stats[diff_key] = eval_results(experiments, diff_key)
+        all_stats[diff_key] = eval_results(experiments, idx, diff_key)
 
     if args.latex:
-        print('\\begin{tabular}[here]{l|rr|rr}')
-        print('Strategy & \multicolumn{2}{c|}' +
+        print('\\begin{tabular}[here]{llr|rr|rr}')
+        print('Criterion & Strategy & Top & \multicolumn{2}{c|}' +
               '{$\\overline{\mbox{pos. by lines}}$} & ' +
               '\multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} ' +
               '\\\\ \\hline')
@@ -158,6 +160,7 @@ def main():
     parser = argparse.ArgumentParser(
         'Print out overall statistics for stats')
     parser.add_argument('--latex', action='store_true', help='Output LaTeX')
+    parser.add_argument('--days', metavar='DAYS', help='Diff days', type=int, default=60)
     args = parser.parse_args()
 
     experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
