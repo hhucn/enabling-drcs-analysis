@@ -1,12 +1,15 @@
-other suggested changes
-    klarstellen: "wir versuchen unser bestes, dem Betrachter die beste Fassung"
-    s/merge voting/commit voting
-    Tabelle Auftrennen
-    klarer erklären was a/b/c bedeutet
-    patch algebra einführen
-    write out summary
-    write out future work
 reenable table
+klarer erklären was a/b/c bedeutet
+Tabelle Auftrennen (fix first)
+note 60d
+
+other suggested changes
+	s/merge voting/commit voting
+	patch algebra einführen
+	verbose commit voting
+	explain implementation in more details
+	write out summary
+    write out future work
 send martin
 
 

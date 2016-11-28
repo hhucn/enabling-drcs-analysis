@@ -15,7 +15,7 @@ HUMAN_NAMES = {
     'master': 'master & pick & 1',
     'ts': 'timestamp & pick & {num}',
     'depth': 'depth & pick & {num}',
-    'size': 'size & pick & {num} &',
+    'size': 'size & pick & {num}',
     'author': 'author & pick & {num}',
     'ts_mours': 'timestamp & partial merge & {num}',
     'depth_mours': 'depth & partial merge & {num}',
