@@ -66,16 +66,15 @@ def run(params):
     first_idx = round(sim_config['cutoff_commits_first'] * len(commit_list))
     first_time = commit_list[first_idx]['ts']
     max_time = commit_list[-1]['ts']
-    future_duration = 24 * 60 * 60 * sim_config['master_comparison_future_days']
-    last_time = max_time - future_duration
+    future_days = sim_config['master_comparison_future_days']
+    future_durations = [24 * 60 * 60 * fd for fd in future_days]
+    last_time = max_time - max(future_durations)
 
     if last_time < first_time:
         print_log(is_parallel, 'No experiment possible: Time range to small. Ignoring ...')
         return
 
     ts = rng.randint(first_time, last_time)
-    future_ts = ts + future_duration
-
     heads = sorted(graph.find_all_heads(commit_dict, ts))
     if len(heads) < sim_config['min_heads']:
         print_log(is_parallel, 'Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
@@ -92,7 +91,16 @@ def run(params):
 
     master_sha = find_master_commit(ts)['sha']
 
-    future_sha = find_master_commit(future_ts)['sha']
+    futures = []
+    for fd in future_days:
+        fd_duration_secs = 24 * 60 * 60 * fd
+        fd_ts = ts + fd_duration_secs
+        futures.append({
+            'days': fd,
+            'duration': fd_duration_secs,
+            'ts': fd_ts,
+            'sha': find_master_commit(fd_ts)['sha'],
+        })
 
     author_counts = graph.count_authors(commit_dict, ts)
 
@@ -128,17 +136,17 @@ def run(params):
         repo.clone(tmp_repo_path)
         tmp_repo = git.repo.Repo(tmp_repo_path)
 
-        future_commit = tmp_repo.commit(future_sha)
+        future_commits = [tmp_repo.commit(f['sha']) for f in futures]
 
-        res['master'] = simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, [master_sha])
+        res['master'] = simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, [master_sha])
 
         for ckey, shas in sorted(by_crits.items()):
             res['merge_greedy_%s' % ckey] = (
-                simutils.merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
+                simutils.merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts))
             res['mours_greedy_%s' % ckey] = (
-                simutils.merge_ours_greedy_diff_all(tmp_repo, future_commit, shas, head_counts))
+                simutils.merge_ours_greedy_diff_all(tmp_repo, future_commits, shas, head_counts))
             res['topmost_%s' % ckey] = (
-                simutils.eval_all_straight(tmp_repo, commit_dict, future_commit, shas[:max_head_count])
+                simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
             )
     finally:
         if not config['args_keep']:
@@ -151,8 +159,7 @@ def run(params):
         'all_heads': by_crits['depth'],
         'ts': ts,
         'master_sha': master_sha,
-        'future_ts': future_ts,
-        'future_sha': future_sha,
+        'futures': futures,
         'res': res,
         'config': sim_config,
         'duration': duration,

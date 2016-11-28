@@ -59,7 +59,7 @@ def merge_greedy(tmp_repo, shas):
     return merged
 
 
-def merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=merge_once):
+def merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts, mergefunc=merge_once):
     assert head_counts == sorted(head_counts)
     hc_it = iter(head_counts)
     hc = next(hc_it)
@@ -73,7 +73,7 @@ def merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=
             res['head_count'] = hc
             res['param'] = hc
             res['merged_commits'] = merged[:]
-            res['diff'] = diff.eval(future_commit, None)
+            res['diffs'] = diff.eval_all(future_commits, None)
             all_res.append(res)
 
             try:
@@ -87,16 +87,16 @@ def merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=
     return all_res
 
 
-def merge_ours_greedy_diff_all(tmp_repo, future_commit, shas, head_counts):
-    return merge_greedy_diff_all(tmp_repo, future_commit, shas, head_counts, mergefunc=merge_ours)
+def merge_ours_greedy_diff_all(tmp_repo, future_commits, shas, head_counts):
+    return merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts, mergefunc=merge_ours)
 
 
-def eval_all_straight(tmp_repo, commit_dict, future_commit, shas):
+def eval_all_straight(tmp_repo, commit_dict, future_commits, shas):
     all_res = []
     for i, sha in enumerate(shas):
         commit = tmp_repo.commit(sha)
         res = get_metadata(commit_dict, sha)
-        res['diff'] = diff.eval(future_commit, commit)
+        res['diffs'] = diff.eval_all(future_commits, commit)
         res['param'] = res['index'] = i
         all_res.append(res)
     return all_res

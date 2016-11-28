@@ -29,6 +29,7 @@ def eval_results(experiments):
                 result_vals[0], result_vals[-1],
                 ))
 
+
 def main():
     parser = argparse.ArgumentParser(
         'Compare and display simulation results')

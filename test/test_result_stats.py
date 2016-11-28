@@ -2,8 +2,6 @@ import os.path
 import sys
 import unittest
 
-import git
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 

@@ -2,7 +2,6 @@
 from __future__ import division
 
 import argparse
-import collections
 import re
 import statistics
 import sys
@@ -118,6 +117,7 @@ def eval_results(experiments, diff_key):
         'medians': medians,
     }
 
+
 def print_results(args, experiments):
     all_stats = {}
     for diff_key in ('lines', 'len'):
@@ -125,7 +125,10 @@ def print_results(args, experiments):
 
     if args.latex:
         print('\\begin{tabular}[here]{l|rr|rr}')
-        print('Strategy & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by lines}}$} & \multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} \\\\ \\hline')
+        print('Strategy & \multicolumn{2}{c|}' +
+              '{$\\overline{\mbox{pos. by lines}}$} & ' +
+              '\multicolumn{2}{c|}{$\\overline{\mbox{pos. by chunks}}$} ' +
+              '\\\\ \\hline')
         rows = all_stats['lines']['by_mean']
         for i, mkey in enumerate(rows):
             skey, _, num = mkey.rpartition('_')
