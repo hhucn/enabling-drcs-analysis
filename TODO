@@ -1,4 +1,21 @@
-update eval for multi-days
+other suggested changes
+    klarstellen: "wir versuchen unser bestes, dem Betrachter die beste Fassung"
+    s/merge voting/commit voting
+    Tabelle Auftrennen
+    klarer erklären was a/b/c bedeutet
+    patch algebra einführen
+    write out summary
+    write out future work
+reenable table
+send martin
+
+
+
+handle rate limit
+code 30 days
+amazon hochladen
+talk about confidence in paper
+
 
 plot histogramm
 
