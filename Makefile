@@ -1,5 +1,5 @@
 run:
-	./list.py -n 900
+	./list.py -n 1000
 	./explore.py
 	./list_prs.py
 	./download.py
