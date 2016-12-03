@@ -47,7 +47,8 @@ def get_candidates(e, diff_idx, diff_key):
 
         if k.startswith('merge_') or k.startswith('mours_'):
             for pval in [2, 5, 10, 20, 50]:
-                candidates['%s_%d' % (outk, pval)] = next(d['diffs'][diff_idx][diff_key] for d in v if d['param'] == pval)
+                candidates['%s_%d' % (outk, pval)] = next(
+                    d['diffs'][diff_idx][diff_key] for d in v if d['param'] == pval)
             continue
         if k == 'topmost_random':
             candidates['%s_0' % (k)] = next(d['diffs'][diff_idx][diff_key] for d in v)
