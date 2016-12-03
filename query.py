@@ -32,6 +32,7 @@ def query(path, params=None):
             print(url)
         r = requests.get(url)
         if r.status_code == 403 and 'X-RateLimit-Reset' in r.headers:
+            reset = int(r.headers['X-RateLimit-Reset'])
             wait = max(0, reset - time.time()) + 60
             sys.stderr.write('Reached API rate limit. Waiting %d seconds ...\n' % wait)
             assert wait < 6 * 3600
