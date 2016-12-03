@@ -1,6 +1,7 @@
 import itertools
 import json
 import re
+import time
 import urllib.parse
 
 import requests
@@ -25,12 +26,20 @@ def build_url(path, params=None):
 
 
 def query(path, params=None):
-    url = build_url(path, params)
-    if utils.read_config().get('verbose'):
-        print(url)
-    r = requests.get(url)
-    if r.status_code != 200:
-        raise Exception('Status %d: %s' % (r.status_code, r.text))
+    while True:
+        url = build_url(path, params)
+        if utils.read_config().get('verbose'):
+            print(url)
+        r = requests.get(url)
+        if r.status_code == 403 and 'X-RateLimit-Reset' in r.headers:
+            wait = max(0, reset - time.time()) + 60
+            sys.stderr.write('Reached API rate limit. Waiting %d seconds ...\n' % wait)
+            assert wait < 6 * 3600
+            time.sleep(wait)
+            continue
+        if r.status_code != 200:
+            raise Exception('Status %d: %s' % (r.status_code, r.text))
+        break
     return (r, json.loads(r.text))
 
 
