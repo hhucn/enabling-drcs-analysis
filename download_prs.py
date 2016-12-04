@@ -60,7 +60,7 @@ def download_prs(args, repo_dict):
         'failures': failures,
     })
 
-    if (args.verbose or args.quiet) and failures:
+    if failures:
         print('They were %d failures for %s: %r' % (
             len(failures), basename,
             [branch_name(f['pull']) for f in failures]))
