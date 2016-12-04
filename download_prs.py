@@ -24,7 +24,7 @@ def download_chunks(origin, failures, prs, chunk_size):
             except git.exc.GitCommandError as gce:
                 failures.append({
                     'pull': pr,
-                    'msg': gce.stderr.decode(),
+                    'msg': gce.stderr,
                 })
     else:
         for prs_chunk in utils.chunks(prs, chunk_size):
