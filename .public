@@ -1,3 +1,4 @@
+diff.py
 download_prs.py
 download.py
 explore.py
@@ -6,7 +7,9 @@ list_prs.py
 list.py
 print_rate_limit.py
 print_stats.py
+graph.py
 sim.py
+simutils.py
 query.py
 utils.py
 Makefile
