@@ -6,7 +6,7 @@ list_prs.py
 list.py
 print_rate_limit.py
 print_stats.py
-sim_picks.py
+sim.py
 query.py
 utils.py
 Makefile
