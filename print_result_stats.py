@@ -161,10 +161,14 @@ def main():
     parser = argparse.ArgumentParser(
         'Print out overall statistics for stats')
     parser.add_argument('--latex', action='store_true', help='Output LaTeX')
+    parser.add_argument('-i', '--input-file', metavar='FILE', help='Read results from this file instead of the default')
     parser.add_argument('--days', metavar='DAYS', help='Diff days', type=int, default=60)
     args = parser.parse_args()
 
-    experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
+    if args.input_file:
+        experiments = utils.read_json(args.input_file)
+    else:
+        experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
     print_results(args, experiments)
 
 
