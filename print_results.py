@@ -33,9 +33,13 @@ def eval_results(experiments):
 def main():
     parser = argparse.ArgumentParser(
         'Compare and display simulation results')
+    parser.add_argument('-i', '--input-file', metavar='FILE', help='Read results from this file instead of the default')
     parser.parse_args()
 
-    experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
+    if args.input_file:
+        experiments = utils.read_json(args.input_file)
+    else:
+        experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
     eval_results(experiments)
 
 
