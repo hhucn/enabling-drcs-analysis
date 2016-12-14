@@ -175,15 +175,19 @@ def run_experiments(args, all_repos):
     is_parallel = args.parallel
 
     while len(res) < n:
-        all_params = [{
-            'config': args.config,
-            'repo_dict': rng.choice(all_repos),
-            'seed': rng.random(),
-            'is_parallel': is_parallel,
-            'idx': i,
-            'n': n,
-            'args_keep': bool(args.keep),
-        } for i in range(len(res), n)]
+        all_params = []
+        for i in range(len(res), n):
+            rd = rng.choice(all_repos)
+            seed = rng.random()
+            all_params.append({
+                'config': args.config,
+                'repo_dict': rd,
+                'seed': seed,
+                'is_parallel': is_parallel,
+                'idx': i,
+                'n': n,
+                'args_keep': bool(args.keep),
+            })
 
         with multiprocessing.Pool() as pool:
             map_func = pool.imap_unordered if is_parallel else map
