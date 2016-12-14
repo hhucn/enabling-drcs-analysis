@@ -1,7 +1,7 @@
 {
   "remotes": [
     {
-      "host": "sec2.phihag.de",
+      "host": "i3",
       "port": 22,
       "dir": "/home/phihag/gha/",
       "username": "phihag"
