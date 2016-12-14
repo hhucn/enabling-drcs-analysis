@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import re
 import statistics
 
 import sim
@@ -9,6 +10,9 @@ import utils
 
 def eval_results(args, experiments):
     for i, e in enumerate(experiments):
+        if args.filter and not re.search(args.filter, e['repo']['full_name']):
+            continue
+
         idx = next(
             i for i, f in enumerate(e['futures'])
             if f['days'] == args.days)
@@ -43,6 +47,9 @@ def main():
     parser.add_argument(
         '-d', '--diff-crit', metavar='CRIT', default='lines',
         help='Difference criterion (lines, files, or len)')
+    parser.add_argument(
+        '-f', '--filter', metavar='REGEXP',
+        help='Filter by repo name (regular expression)')
     parser.add_argument('--days', metavar='DAYS', help='Diff days', type=int, default=60)
     args = parser.parse_args()
 
