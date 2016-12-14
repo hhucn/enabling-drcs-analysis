@@ -8,6 +8,7 @@ run:
 	./sim_picks.py -q
 
 deps:
+	sudo apt install -y git python3-pip
 	pip3 install progress requests gitpython
 
 test:

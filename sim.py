@@ -149,7 +149,7 @@ def run(params):
                 simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
             )
     finally:
-        if not config['args_keep']:
+        if not param['args_keep']:
             shutil.rmtree(tmp_repo_path)
 
     duration = time.perf_counter() - start_time
@@ -182,6 +182,7 @@ def run_experiments(args, all_repos):
             'is_parallel': is_parallel,
             'idx': i,
             'n': n,
+            'args_keep': bool(args.keep),
         } for i in range(len(res), n)]
 
         with multiprocessing.Pool() as pool:
