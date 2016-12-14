@@ -36,6 +36,7 @@ class DiffTest(unittest.TestCase):
             self.assertEqual(dres, {
                 'len': 1,
                 'lines': 0,
+                'files': 1,
             })
 
     def test_diff_text(self):
@@ -80,16 +81,19 @@ class DiffTest(unittest.TestCase):
             self.assertEqual(dres, {
                 'lines': 1,
                 'len': 1,
+                'files': 1,
             })
             dres = diff.eval(v2, v3)
             self.assertEqual(dres, {
                 'lines': 2,
                 'len': 1,
+                'files': 1,
             })
             dres = diff.eval(v3, v4)
             self.assertEqual(dres, {
                 'lines': 4,
                 'len': 2,
+                'files': 3,
             })
 
     def test_rename(self):
@@ -118,6 +122,7 @@ class DiffTest(unittest.TestCase):
             self.assertEqual(dres, {
                 'lines': 0,
                 'len': 1,
+                'files': 2,
             })
 
     def test_local(self):
@@ -144,6 +149,7 @@ class DiffTest(unittest.TestCase):
             self.assertEqual(dres, {
                 'lines': 5,
                 'len': 1,
+                'files': 1,
             })
 
 

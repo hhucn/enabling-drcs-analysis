@@ -7,9 +7,12 @@ run:
 	./gen_commit_lists.py -q
 	./sim_picks.py -q
 
-deps:
-	sudo apt install -y git python3-pip htop strace screen
-	pip3 install progress requests gitpython
+deps-sys:
+	sudo apt update
+	sudo apt install -y build-essential git python3-pip htop strace screen
+
+deps: deps-sys
+	sudo pip3 install progress requests gitpython
 
 test:
 	nosetests3 test/

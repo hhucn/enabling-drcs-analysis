@@ -22,6 +22,6 @@ test
 README
 
 # only for our server
-config_s.json
+config.json
 
 !data
