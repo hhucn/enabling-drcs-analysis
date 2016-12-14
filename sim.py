@@ -225,7 +225,6 @@ def main():
 
     utils.ensure_datadir(DIRNAME)
     args.config = config
-    config['args_keep'] = args.keep
 
     def _should_visit(repo_dict):
         if repo_dict['full_name'] in ignored_repos:
