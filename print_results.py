@@ -10,7 +10,7 @@ import utils
 
 def eval_results(args, experiments):
     for i, e in enumerate(experiments):
-        if args.filter and not re.search(args.filter, e['repo']['full_name']):
+        if args.filter and not re.search(args.filter, e['repo']):
             continue
 
         idx = next(
