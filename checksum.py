@@ -2,20 +2,19 @@
 
 import argparse
 import json
-import os
 import hashlib
 
 import utils
 
 
 def dict_checksum(obj):
-	j = json.dumps(obj, ensure_ascii=False, sort_keys=True)
-	return hashlib.sha256(j.encode('utf-8')).hexdigest()
+    j = json.dumps(obj, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(j.encode('utf-8')).hexdigest()
 
 
 def print_checksum(args):
-	print('config: %s' % dict_checksum(args.config))
-	print('list: %s' % dict_checksum(utils.read_data('list')))
+    print('config: %s' % dict_checksum(args.config))
+    print('list: %s' % dict_checksum(utils.read_data('list')))
 
 
 def main():
@@ -28,4 +27,4 @@ def main():
     print_checksum(args)
 
 if __name__ == '__main__':
-	main()
+    main()
