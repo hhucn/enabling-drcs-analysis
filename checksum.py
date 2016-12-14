@@ -15,6 +15,7 @@ def dict_checksum(obj):
 
 def print_checksum(args):
 	print('config: %s' % dict_checksum(args.config))
+	print('list: %s' % dict_checksum(utils.read_data('list')))
 
 
 def main():
