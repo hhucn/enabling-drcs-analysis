@@ -149,7 +149,7 @@ def run(params):
                 simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
             )
     finally:
-        if not param['args_keep']:
+        if not params['args_keep']:
             shutil.rmtree(tmp_repo_path)
 
     duration = time.perf_counter() - start_time
