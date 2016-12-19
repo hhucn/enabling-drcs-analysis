@@ -1,3 +1,7 @@
+document what git version was used for experiments
+checksum more
+sim: resume
+why author so bad
 other suggested changes
 	explain implementation in more details
 analysis days
@@ -33,5 +37,3 @@ fix accept (symfony)
 compare against multiple future commits
 compare output future date
 try simple diff by checking out twice? might be faster, but ignore .git
-
-document what git version was used for experiments
