@@ -8,27 +8,10 @@ import sys
 
 import sim
 import utils
+from print_helpers import HUMAN_NAMES
 
 
 IDXS = [0, 1, 4, 9, 49]
-HUMAN_NAMES = {
-    'master': 'master & 1 & pick',
-    'ts': 'timestamp & {num} & pick',
-    'depth': 'depth & {num} & pick',
-    'size': 'size & {num} & pick',
-    'author': 'author & {num} & pick',
-    'ts_mours': 'timestamp & {num} & partial merge',
-    'depth_mours': 'depth & {num} & partial merge',
-    'size_mours': 'size & {num} & partial merge',
-    'author_mours': 'author & {num} & partial merge',
-    'ts_merge': 'timestamp & {num} & merged',
-    'depth_merge': 'depth & {num} & merged',
-    'size_merge': 'size & {num} & merged',
-    'author_merge': 'author & {num} & merged',
-    'topmost_random': 'random & 1 & pick',
-    'random_merge': 'random & {num} & merged',
-    'random_mours': 'random & {num} & partial merge',
-}
 
 
 def get_candidates(e, diff_idx, diff_key):
