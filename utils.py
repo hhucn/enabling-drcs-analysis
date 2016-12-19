@@ -1,6 +1,7 @@
 import errno
 import itertools
 import json
+import math
 import os.path
 import re
 import time
@@ -161,3 +162,15 @@ def time_func(func, args=[], kwargs={}):
     end = time.clock()
     print('That took %r seconds' % (end - start))
     return res
+
+def percentile(percent, data):
+    # From http://stackoverflow.com/a/2753343/35070
+    sorted_data = sorted(data)
+    k = (len(sorted_data) - 1) * percent
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return sorted_data[int(k)]
+    d0 = sorted_data[int(f)] * (c-k)
+    d1 = sorted_data[int(c)] * (k-f)
+    return d0+d1
