@@ -98,7 +98,14 @@ def eval_days(args, experiments):
         statistics.median(
             max(ex.values())
             for ex in by_days[d]['chunks_by_experiment'].values())
-        for d in days)))
+        for d in days)))    
+
+    # print('5\\%% quantil of CV & %s \\\\ \\hline' % (' & '.join('%d' %
+    #     utils.percentile(0.5,
+    #         [cv(experiment.values())
+    #          for experiment in by_days[d]['lines_by_experiment'].values()]
+    #     ) for d in days)))
+    print('\\end{tabular}')
 
 def main():
     parser = argparse.ArgumentParser(
