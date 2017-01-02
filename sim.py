@@ -148,9 +148,16 @@ def run(params):
             res['topmost_%s' % ckey] = (
                 simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
             )
-    finally:
+
         if not params['args_keep']:
             shutil.rmtree(tmp_repo_path)
+    except KeyboardInterrupt:
+        if not params['args_keep']:
+            shutil.rmtree(tmp_repo_path)
+    except Exception as e:
+        print_log(
+            is_parallel,
+            '[%s] Aborting due to error: %s' % (repo_dict['full_name'], traceback.format_exc(e)))
 
     duration = time.perf_counter() - start_time
 
