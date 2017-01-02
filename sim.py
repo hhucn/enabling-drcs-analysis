@@ -158,6 +158,7 @@ def run(params):
         print_log(
             is_parallel,
             '[%s] Aborting due to error: %s' % (repo_dict['full_name'], traceback.format_exc(e)))
+        return
 
     duration = time.perf_counter() - start_time
 
