@@ -154,6 +154,7 @@ def run(params):
     except KeyboardInterrupt:
         if not params['args_keep']:
             shutil.rmtree(tmp_repo_path)
+        raise
     except Exception as e:
         print_log(
             is_parallel,
