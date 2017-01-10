@@ -40,7 +40,7 @@ def run(params):
     seed = params['seed']
     is_parallel = params['is_parallel']
 
-    msg = '[%d/%d] %s' % (params['idx'], params['n'], repo_dict['full_name'])
+    msg = '[%d/%d] %s (seed: %d)' % (params['idx'], params['n'], repo_dict['full_name'], seed)
     print_log(is_parallel, msg)
 
     start_time = time.perf_counter()
