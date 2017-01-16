@@ -225,6 +225,8 @@ def main():
     utils.ensure_datadir(sim_utils.RESULTS_DIRNAME)
     args.config = config
 
+    git_utils.setup()
+
     run_experiments(args)
 
 
