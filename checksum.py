@@ -78,7 +78,7 @@ def main():
                     res['params']['idx'],
                     res['params']['repo_dict']['full_name'],
                     dict_checksum(res)))
-            break
+            continue
 
         cfunc = COMPONENTS_MAP.get(cname)
         if cfunc:
