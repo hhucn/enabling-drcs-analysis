@@ -160,7 +160,10 @@ def calc_fn(params):
 
 def read_results():
     tasks = utils.read_data('sim_tasks')
+    res = []
     for params in tasks:
         fn = calc_fn(params)
         if utils.data_exists(fn, dirname=RESULTS_DIRNAME):
-            yield utils.read_data(fn, dirname=RESULTS_DIRNAME)
+            r = utils.read_data(fn, dirname=RESULTS_DIRNAME)
+            res.append(r)
+    return res

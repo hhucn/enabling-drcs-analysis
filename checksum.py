@@ -59,7 +59,7 @@ def main():
         metavar='COMPONENTS', default=None,
         help=((
             'Comma-separated list naming the components to be matched.' +
-            ' Available components: all_experiments,%s') % ', '.join(cname for cname, _cfunc in COMPONENTS)))
+            ' Available components: all_experiments, %s') % ', '.join(cname for cname, _cfunc in COMPONENTS)))
     args = parser.parse_args()
 
     config = utils.read_config()
