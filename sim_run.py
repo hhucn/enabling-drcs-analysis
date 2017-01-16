@@ -131,7 +131,7 @@ def run(arg_dict, params):
     head_counts = sim_config['experiments_head_counts']
     max_head_count = max(head_counts)
 
-    suffix = '-%s-%d' % (utils.timestr(time.time()), os.getpid())
+    suffix = '-%s-%d' % (utils.timestr(time.time()), seed)
     tmp_repo_path = utils.calc_filename(
         basename, dirname=TMP_REPOS, suffix=suffix)
     assert basename in tmp_repo_path
@@ -191,8 +191,8 @@ def run_experiments(args):
     with multiprocessing.Pool() as pool:
         map_func = pool.imap_unordered if args.parallel else map
         try:
-            for count, _ in enumerate(map_func(run_with_args, tasks), start=1):
-                print('Completed %d/%d experiments' % (count, len(tasks)))
+            for _ in map_func(run_with_args, tasks):
+                pass
         except KeyboardInterrupt:
             traceback.print_exc()
 
