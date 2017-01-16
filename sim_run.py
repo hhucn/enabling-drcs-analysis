@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import functools
 import multiprocessing
 import os
 import random
@@ -11,6 +12,7 @@ import traceback
 
 import git
 
+import checksum
 import download
 import gen_commit_lists
 import graph
@@ -34,11 +36,24 @@ def print_log(is_parallel, msg):
         print('%s' % msg)
 
 
-def run(params):
+def run(arg_dict, params):
+    fn = utils.safe_filename(
+        '%05d_%s_%s' % (
+            params['idx'],
+            params['repo_dict']['full_name'],
+            checksum.dict_checksum(params))
+    )
+
+    # Already did this experiment?
+    if utils.data_exists(fn, dirname=RESULTS_DIRNAME) and not arg_dict['redo']:
+        msg = '[%d/%d] %s (seed: %d): done already, reading result' % (params['idx'], params['n'], repo_dict['full_name'], seed)
+        print_log(is_parallel, msg)
+        return utils.read_data(fn, dirname=RESULTS_DIRNAME)
+
     repo_dict = params['repo_dict']
     config = params['config']
     seed = params['seed']
-    is_parallel = params['is_parallel']
+    is_parallel = arg_dict['parallel']
 
     msg = '[%d/%d] %s (seed: %d)' % (params['idx'], params['n'], repo_dict['full_name'], seed)
     print_log(is_parallel, msg)
@@ -146,10 +161,10 @@ def run(params):
                 sim_utils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
             )
 
-        if not params['args_keep']:
+        if not arg_dict['keep']:
             shutil.rmtree(tmp_repo_path)
     except KeyboardInterrupt:
-        if not params['args_keep']:
+        if not arg_dict['keep']:
             shutil.rmtree(tmp_repo_path)
         raise
     except Exception as e:
@@ -171,21 +186,23 @@ def run(params):
         'duration': duration,
     }
 
-    utils.write_data('experiment_%d' % params['idx'], experiment, dirname=RESULTS_DIRNAME)
+    utils.write_data(fn, experiment, dirname=RESULTS_DIRNAME)
 
     return experiment
 
 
 def run_experiments(args):
     tasks = utils.read_data('sim_tasks')
-    for t in tasks:
-        t['is_parallel'] = args.parallel
-        t['args_keep'] = args.keep
+    arg_dict = {
+        'parallel': args.parallel,
+        'keep': args.keep,
+    }
+    run_with_args = functools.partial(run, arg_dict)
 
     with multiprocessing.Pool() as pool:
         map_func = pool.imap_unordered if args.parallel else map
         try:
-            for count, _ in enumerate(map_func(run, tasks), start=1):
+            for count, _ in enumerate(map_func(run_with_args, tasks), start=1):
                 print('Completed %d/%d experiments' % (count, len(tasks)))
         except KeyboardInterrupt:
             traceback.print_exc()
@@ -202,6 +219,11 @@ def main():
         '-k', '--keep',
         action='store_true',
         help='Keep temporary directories')
+    parser.add_argument(
+        '-r', '--redo',
+        default=False,
+        action='store_true',
+        help='Do experiments that have been done already')
     args = parser.parse_args()
 
     config = utils.read_config()
