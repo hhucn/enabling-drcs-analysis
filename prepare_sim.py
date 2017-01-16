@@ -12,7 +12,7 @@ def prepare(args, all_repos):
     rng = random.Random(0)
     n = args.config['sim']['experiment_count']
     tasks = []
-    printfunc = lambda x: x if args.quiet else print
+    printfunc = (lambda x: x) if args.quiet else print
 
     while len(tasks) < n:
         for i in range(len(tasks), n):
@@ -42,7 +42,7 @@ def main():
         help='Filter by repository fullname (regular expressions)')
     parser.add_argument(
         '-q', '--quiet',
-        action='store_true',
+        action='store_true', default=False,
         help='Do not output that much chatter')
     args = parser.parse_args()
 
