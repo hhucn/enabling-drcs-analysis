@@ -5,7 +5,9 @@ run:
 	./download.py
 	./download_prs.py
 	./gen_commit_lists.py -q
-	./prepare_sim.py
+
+	./sim_prepare.py
+	./sim_run.py
 
 deps-sys:
 	sudo apt update

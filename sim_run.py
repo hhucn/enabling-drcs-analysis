@@ -18,7 +18,8 @@ import sim_utils
 import utils
 
 
-DIRNAME = 'sim_results'
+RESULTS_DIRNAME = 'sim_results'
+TMP_REPOS = 'tmp_repos'
 
 
 def print_log(is_parallel, msg):
@@ -48,8 +49,7 @@ def run(params):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-        print_log(is_parallel, 'No commit list for %s, skipping.' % repo_dict['full_name'])
-        return
+        raise Exception('No commit list for %s, skipping.' % repo_dict['full_name'])
 
     path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
     repo = git.repo.Repo(path)
@@ -70,14 +70,12 @@ def run(params):
     last_time = max_time - max(future_durations)
 
     if last_time < first_time:
-        print_log(is_parallel, 'No experiment possible: Time range to small. Ignoring ...')
-        return
+        raise Exception('No experiment possible: Time range to small. Ignoring ...')
 
     ts = rng.randint(first_time, last_time)
     heads = sorted(graph.find_all_heads(commit_dict, ts))
     if len(heads) < sim_config['min_heads']:
-        print_log(is_parallel, 'Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
-        return
+        raise Exception('Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
 
     graph.calc_children(commit_dict)
     graph.calc_depths(commit_dict)
@@ -155,7 +153,7 @@ def run(params):
             shutil.rmtree(tmp_repo_path)
         raise
     except Exception as e:
-        print_log(
+        print(
             is_parallel,
             '[%s] Aborting due to error: %s' % (repo_dict['full_name'], traceback.format_tb(e.__traceback__())))
         return
@@ -172,92 +170,41 @@ def run(params):
         'config': sim_config,
         'duration': duration,
     }
+
+    utils.write_data('experiment_%d' % params['idx'], experiment, dirname=RESULTS_DIRNAME)
+
     return experiment
 
 
-def run_experiments(args, all_repos):
-    rng = random.Random(0)
-    n = args.n
-    res = []
+def run_experiments(args):
+    tasks = utils.read_data('sim_tasks')
+    for t in tasks:
+        t['is_parallel'] = args.parallel
 
-    is_parallel = args.parallel
-
-    while len(res) < n:
-        all_params = []
-        for i in range(len(res), n):
-            rd = rng.choice(all_repos)
-            seed = rng.random()
-            all_params.append({
-                'config': args.config,
-                'repo_dict': rd,
-                'seed': seed,
-                'is_parallel': is_parallel,
-                'idx': i,
-                'n': n,
-                'args_keep': bool(args.keep),
-            })
-
-        with multiprocessing.Pool() as pool:
-            map_func = pool.imap_unordered if is_parallel else map
-            try:
-                new_res = map_func(run, all_params)
-                for nr in new_res:
-                    if nr:
-                        res.append(nr)
-                        print('Completed %d/%d experiments' % (len(res), n))
-            except KeyboardInterrupt:
-                traceback.print_exc()
-                break
-
-    return res
+    with multiprocessing.Pool() as pool:
+        map_func = pool.imap_unordered if args.parallel else map
+        try:
+            for count, _ in enumerate(map_func(run, tasks)):
+                print('Completed %d/%d experiments' % (count, len(tasks)))
+        except KeyboardInterrupt:
+            traceback.print_exc()
 
 
 def main():
     parser = argparse.ArgumentParser(
         'Run experiments at random times')
     parser.add_argument(
-        '-k', '--keep', action='store_true',
-        help='Keep temporary repositories'
-    )
-    parser.add_argument(
         '-p', '--parallel', action='store_true',
         help='Run in parallel'
     )
-    parser.add_argument(
-        '-f', '--filter',
-        metavar='REGEXP', type=re.compile,
-        help='Filter by repository fullname (regular expressions)')
-    parser.add_argument(
-        '-n', '--experiment-count', default=100,
-        metavar='COUNT', type=int, dest='n',
-        help='Number of experiments to perform (default: %(default)s)')
     args = parser.parse_args()
 
     config = utils.read_config()
-    ignored_repos = set(config.get('ignored_repos', []))
-
-    utils.ensure_datadir(DIRNAME)
+    utils.ensure_datadir(TMP_REPOS)
+    utils.ensure_datadir(RESULTS_DIRNAME)
     args.config = config
 
-    def _should_visit(repo_dict):
-        if repo_dict['full_name'] in ignored_repos:
-            return False
-
-        if args.filter and not args.filter.search(repo_dict['full_name']):
-            return False
-
-        return True
-
-    all_repos = list(filter(_should_visit, utils.read_data('list')))
-    experiments = []
-    for e in run_experiments(args, all_repos):
-        experiments.append(e)
-
-    basename = 'experiments'
-    fn = utils.calc_filename(basename, dirname=DIRNAME)
-    if experiments:
-        print('Writing %d experiments to %s ...' % (len(experiments), fn))
-        utils.write_data(basename, experiments, dirname=DIRNAME)
+    run_experiments(args)
 
 
 if __name__ == '__main__':
