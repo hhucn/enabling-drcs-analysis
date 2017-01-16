@@ -10,6 +10,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class DiffTest(unittest.TestCase):
+    def setUp(self):
+        import git_util
+        git_util.setup()
+
     def test_diff_bin(self):
         import diff
 

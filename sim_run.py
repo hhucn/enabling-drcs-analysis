@@ -14,6 +14,7 @@ import git
 
 import download
 import gen_commit_lists
+import git_utils
 import graph
 import sim_utils
 import utils
