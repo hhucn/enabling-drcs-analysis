@@ -2,8 +2,8 @@
 
 import random
 
-import git
-
+import gen_commit_lists
+import graph
 import utils
 
 
@@ -21,9 +21,6 @@ def check_experiment(params, warn_func):
     if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
         warn_func('No commit list for %s, skipping.' % repo_dict['full_name'])
         return False
-
-    path = utils.calc_filename(basename, dirname=download.DIRNAME, suffix='')
-    repo = git.repo.Repo(path)
 
     sim_config = config['sim']
     utils.ensure_datadir(TMP_REPOS)
