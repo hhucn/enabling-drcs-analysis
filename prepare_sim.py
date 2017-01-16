@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-import multiprocessing
-import os
 import random
 import re
-import shutil
 
 import sim_lib
+import utils
 
 
 DIRNAME = 'sim_tasks'
@@ -30,9 +28,8 @@ def prepare(args, all_repos):
                 'n': n,
             }
 
-
-
-
+            if sim_lib.check_experiment(params, print):
+                tasks.push(params)
 
 
 def main():
