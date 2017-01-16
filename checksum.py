@@ -54,7 +54,7 @@ COMPONENTS_MAP = {
 def main():
     parser = argparse.ArgumentParser('Show a checksum over the data')
     parser.add_argument(
-        '-f', '--filter',
+        '-c', '--components',
         metavar='COMPONENTS', default=None,
         help=((
             'Comma-separated list naming the components to be matched.' +
@@ -64,8 +64,8 @@ def main():
     config = utils.read_config()
     args.config = config
 
-    if args.filter:
-        component_names = args.filter.split(',')
+    if args.components:
+        component_names = args.components.split(',')
     else:
         component_names = [cname for cname, _ in COMPONENTS]
 
