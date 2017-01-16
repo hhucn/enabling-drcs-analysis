@@ -53,8 +53,6 @@ def run(arg_dict, params):
     msg = '[%d/%d] %s (seed: %d)' % (params['idx'], params['n'], repo_dict['full_name'], seed)
     print_log(is_parallel, msg)
 
-    start_time = time.perf_counter()
-
     rng = random.Random(seed)
     basename = utils.safe_filename(repo_dict['full_name'])
 
@@ -165,8 +163,6 @@ def run(arg_dict, params):
     except Exception as e:
         raise
 
-    duration = time.perf_counter() - start_time
-
     experiment = {
         'repo': basename,
         'all_heads': by_crits['depth'],
@@ -176,7 +172,6 @@ def run(arg_dict, params):
         'res': res,
         'config': sim_config,
         'params': params,
-        #  'duration': duration,  # Do not save - this breaks checksums!
     }
 
     utils.write_data(fn, experiment, dirname=sim_utils.RESULTS_DIRNAME)

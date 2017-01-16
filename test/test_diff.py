@@ -193,7 +193,7 @@ class DiffTest(unittest.TestCase):
 
             repo = git.Repo(td)
             v1 = repo.commit('v1')
-            dres = diff.eval(v1, None)
+            diff.eval(v1, None)
 
 
 if __name__ == '__main__':
