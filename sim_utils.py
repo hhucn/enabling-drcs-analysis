@@ -173,4 +173,7 @@ def read_results():
 
 
 def rm_gitcrap(basepath):
-    subprocess.check_call(['find', basepath, '-name', '.gitmodules', '-delete'])
+    for dirpath, dirnames, filenames in os.walk(basepath, topdown=True):
+        dirnames.remove('.git')
+        if '.gitmodules' in filenames:
+            os.unlink(os.path.join(dirpath, '.gitmodules'))
