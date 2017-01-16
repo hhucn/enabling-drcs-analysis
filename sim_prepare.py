@@ -23,7 +23,7 @@ def prepare(args, all_repos):
                 'config': args.config,
                 'repo_dict': rd,
                 'seed': seed,
-                'idx': i,
+                'idx': len(tasks),
                 'n': n,
             }
 

@@ -17,6 +17,7 @@ sim_prepare.py
 sim_run.py
 sim_utils.py
 utils.py
+print_tasks.py
 
 Makefile
 test

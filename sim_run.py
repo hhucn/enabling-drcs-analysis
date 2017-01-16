@@ -37,10 +37,15 @@ def print_log(is_parallel, msg):
 
 
 def run(arg_dict, params):
+    repo_dict = params['repo_dict']
+    config = params['config']
+    seed = params['seed']
+    is_parallel = arg_dict['parallel']
+
     fn = utils.safe_filename(
         '%05d_%s_%s' % (
             params['idx'],
-            params['repo_dict']['full_name'],
+            repo_dict['full_name'],
             checksum.dict_checksum(params))
     )
 
@@ -49,11 +54,6 @@ def run(arg_dict, params):
         msg = '[%d/%d] %s (seed: %d): done already, reading result' % (params['idx'], params['n'], repo_dict['full_name'], seed)
         print_log(is_parallel, msg)
         return utils.read_data(fn, dirname=RESULTS_DIRNAME)
-
-    repo_dict = params['repo_dict']
-    config = params['config']
-    seed = params['seed']
-    is_parallel = arg_dict['parallel']
 
     msg = '[%d/%d] %s (seed: %d)' % (params['idx'], params['n'], repo_dict['full_name'], seed)
     print_log(is_parallel, msg)
@@ -196,6 +196,7 @@ def run_experiments(args):
     arg_dict = {
         'parallel': args.parallel,
         'keep': args.keep,
+        'redo': args.redo,
     }
     run_with_args = functools.partial(run, arg_dict)
 
