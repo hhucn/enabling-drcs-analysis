@@ -59,5 +59,6 @@ class MergeTest(unittest.TestCase):
                 content = f.read()
             self.assertEqual(content, 'The quick\nblue\nrabbit\njumped\n')
 
+
 if __name__ == '__main__':
     unittest.main()

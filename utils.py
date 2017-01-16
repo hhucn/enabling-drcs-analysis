@@ -163,6 +163,7 @@ def time_func(func, args=[], kwargs={}):
     print('That took %r seconds' % (end - start))
     return res
 
+
 def percentile(percent, data):
     # From http://stackoverflow.com/a/2753343/35070
     sorted_data = sorted(data)

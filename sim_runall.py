@@ -19,7 +19,6 @@ import utils
 
 
 DIRNAME = 'sim_results'
-TMP_REPOS = 'sim_tmp'
 
 
 def print_log(is_parallel, msg):

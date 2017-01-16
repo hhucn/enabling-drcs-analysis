@@ -23,5 +23,6 @@ def main():
 
     utils.write_data('list', res)
 
+
 if __name__ == '__main__':
     main()

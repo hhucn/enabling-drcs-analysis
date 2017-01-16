@@ -1,16 +1,15 @@
 import os.path
-import subprocess
 import sys
 import tempfile
 import unittest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import checksum
-
 
 class ChecksumTest(unittest.TestCase):
     def test_tree_checksums(self):
+        import checksum
+
         with tempfile.TemporaryDirectory(suffix='test_checksum_') as td:
             os.mkdir(os.path.join(td, 'dir'))
             with open(os.path.join(td, 'filea'), 'wb') as f1:
@@ -28,6 +27,7 @@ class ChecksumTest(unittest.TestCase):
                 'dir2': '(directory)',
                 'dir2/dir3': '(directory)',
             })
+
 
 if __name__ == '__main__':
     unittest.main()

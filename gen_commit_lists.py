@@ -75,5 +75,6 @@ def main():
         'Generate a list of all commits in a repository')
     utils.iter_repos(parser, DIRNAME, gen_commit_list)
 
+
 if __name__ == '__main__':
     main()

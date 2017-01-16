@@ -70,5 +70,6 @@ def main():
     parser = argparse.ArgumentParser('Download pull requests')
     utils.iter_repos(parser, DIRNAME, download_prs)
 
+
 if __name__ == '__main__':
     main()

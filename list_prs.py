@@ -30,5 +30,6 @@ def main():
     parser = argparse.ArgumentParser('List all pull requests')
     utils.iter_repos(parser, DIRNAME, list_prs)
 
+
 if __name__ == '__main__':
     main()

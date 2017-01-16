@@ -38,6 +38,7 @@ def tree_checksums(root):
 
     return res
 
+
 def print_checksum(args):
     print('config: %s' % dict_checksum(args.config))
     print('list: %s' % dict_checksum(utils.read_data('list')))
@@ -54,6 +55,7 @@ def main():
     args.config = config
 
     print_checksum(args)
+
 
 if __name__ == '__main__':
     main()
