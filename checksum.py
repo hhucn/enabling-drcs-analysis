@@ -46,6 +46,8 @@ def print_checksum(args):
     repos_dir = os.path.join(utils.DATA_DIR, 'repos')
     print('repos: %s' % dict_checksum(tree_checksums(repos_dir)))
 
+    print('sim preparation: %s' % dict_checksum(utils.read_data('sim_tasks')))
+
 
 def main():
     parser = argparse.ArgumentParser('Show a checksum over the data')

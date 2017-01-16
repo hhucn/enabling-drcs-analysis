@@ -8,9 +8,6 @@ import sim_lib
 import utils
 
 
-DIRNAME = 'sim_tasks'
-
-
 def prepare(args, all_repos):
     rng = random.Random(0)
     n = args.config['sim']['experiment_count']
@@ -33,6 +30,8 @@ def prepare(args, all_repos):
             else:
                 print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
 
+    return tasks
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -45,8 +44,6 @@ def main():
 
     config = utils.read_config()
     ignored_repos = set(config.get('ignored_repos', []))
-
-    utils.ensure_datadir(DIRNAME)
     args.config = config
 
     def _should_visit(repo_dict):
@@ -59,11 +56,9 @@ def main():
         return True
 
     all_repos = list(filter(_should_visit, utils.read_data('list')))
-    tasks = []
-    for e in prepare(args, all_repos):
-        tasks.append(e)
+    tasks = prepare(args, all_repos)
 
-    utils.write_data('tasks', tasks, dirname=DIRNAME)
+    utils.write_data('sim_tasks', tasks)
 
 
 if __name__ == '__main__':
