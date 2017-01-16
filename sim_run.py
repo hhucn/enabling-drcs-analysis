@@ -176,7 +176,7 @@ def run(arg_dict, params):
         'res': res,
         'config': sim_config,
         'params': params,
-        'duration': duration,
+        #  'duration': duration,  # Do not save - this breaks checksums!
     }
 
     utils.write_data(fn, experiment, dirname=sim_utils.RESULTS_DIRNAME)
