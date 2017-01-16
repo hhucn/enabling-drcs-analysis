@@ -12,6 +12,7 @@ def prepare(args, all_repos):
     rng = random.Random(0)
     n = args.config['sim']['experiment_count']
     tasks = []
+    printfunc = lambda x: x if args.quiet else print
 
     while len(tasks) < n:
         for i in range(len(tasks), n):
@@ -25,9 +26,9 @@ def prepare(args, all_repos):
                 'n': n,
             }
 
-            if sim_utils.check_experiment(params, print):
+            if sim_utils.check_experiment(params, printfunc):
                 tasks.append(params)
-                print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
+                printfunc('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
 
     return tasks
 
@@ -39,6 +40,10 @@ def main():
         '-f', '--filter',
         metavar='REGEXP', type=re.compile,
         help='Filter by repository fullname (regular expressions)')
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='Do not output that much chatter')
     args = parser.parse_args()
 
     config = utils.read_config()
