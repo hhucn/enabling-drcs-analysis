@@ -2,10 +2,14 @@ import random
 
 import git
 
+import checksum
 import diff
 import gen_commit_lists
 import graph
 import utils
+
+
+RESULTS_DIRNAME = 'sim_results'
 
 
 def get_metadata(commit_dict, sha):
@@ -143,3 +147,20 @@ def check_experiment(params, warn_func):
         return False
 
     return True
+
+
+def calc_fn(params):
+    return utils.safe_filename(
+        '%05d_%s_%s' % (
+            params['idx'],
+            params['repo_dict']['full_name'],
+            checksum.dict_checksum(params))
+    )
+
+
+def read_results():
+    tasks = utils.read_data('sim_tasks')
+    for params in tasks:
+        fn = calc_fn(params)
+        if utils.data_exists(fn, dirname=RESULTS_DIRNAME):
+            yield utils.read_data(fn, dirname=RESULTS_DIRNAME)

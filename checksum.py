@@ -6,6 +6,7 @@ import hashlib
 import os.path
 
 import utils
+import sim_utils
 
 
 def dict_checksum(obj):
@@ -43,7 +44,7 @@ COMPONENTS = [
     ('config', lambda args: dict_checksum(args.config)),
     ('list', lambda _: dict_checksum(utils.read_data('list'))),
     ('repos', lambda _: dict_checksum(tree_checksums(os.path.join(utils.DATA_DIR, 'repos')))),
-    ('prep', lambda _: dict_checksum(utils.read_data('sim_tasks'))),
+    ('tasks', lambda _: dict_checksum(utils.read_data('sim_tasks'))),
 ]
 COMPONENTS_MAP = {
     cname: cfunc
@@ -58,7 +59,7 @@ def main():
         metavar='COMPONENTS', default=None,
         help=((
             'Comma-separated list naming the components to be matched.' +
-            ' Available components are %s') % ', '.join(cname for cname, _cfunc in COMPONENTS)))
+            ' Available components: all_experiments,%s') % ', '.join(cname for cname, _cfunc in COMPONENTS)))
     args = parser.parse_args()
 
     config = utils.read_config()
@@ -68,8 +69,17 @@ def main():
         component_names = args.components.split(',')
     else:
         component_names = [cname for cname, _ in COMPONENTS]
+        component_names.append('all_experiments')
 
     for cname in component_names:
+        if cname == 'all_experiments':
+            for res in sim_utils.read_results():
+                print('result #%d (%s): %s' % (
+                    res['params']['idx'],
+                    res['params']['repo_dict']['full_name'],
+                    dict_checksum(res)))
+            break
+
         cfunc = COMPONENTS_MAP.get(cname)
         if cfunc:
             cres = cfunc(args)

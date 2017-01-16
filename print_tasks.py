@@ -4,6 +4,7 @@ import argparse
 
 import utils
 
+
 def print_tasks(_):
     tasks = utils.read_data('sim_tasks')
     for params in tasks:

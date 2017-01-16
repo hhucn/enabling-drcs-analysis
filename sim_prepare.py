@@ -4,7 +4,6 @@ import argparse
 import random
 import re
 
-import checksum
 import sim_utils
 import utils
 

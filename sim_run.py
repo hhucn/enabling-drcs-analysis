@@ -12,7 +12,6 @@ import traceback
 
 import git
 
-import checksum
 import download
 import gen_commit_lists
 import graph
@@ -20,7 +19,6 @@ import sim_utils
 import utils
 
 
-RESULTS_DIRNAME = 'sim_results'
 TMP_REPOS = 'tmp_repos'
 
 
@@ -42,18 +40,14 @@ def run(arg_dict, params):
     seed = params['seed']
     is_parallel = arg_dict['parallel']
 
-    fn = utils.safe_filename(
-        '%05d_%s_%s' % (
-            params['idx'],
-            repo_dict['full_name'],
-            checksum.dict_checksum(params))
-    )
+    fn = sim_utils.calc_fn(params)
 
     # Already did this experiment?
-    if utils.data_exists(fn, dirname=RESULTS_DIRNAME) and not arg_dict['redo']:
-        msg = '[%d/%d] %s (seed: %d): done already, reading result' % (params['idx'], params['n'], repo_dict['full_name'], seed)
+    if utils.data_exists(fn, dirname=sim_utils.RESULTS_DIRNAME) and not arg_dict['redo']:
+        msg = '[%d/%d] %s (seed: %d): done already, reading result' % (
+            params['idx'], params['n'], repo_dict['full_name'], seed)
         print_log(is_parallel, msg)
-        return utils.read_data(fn, dirname=RESULTS_DIRNAME)
+        return utils.read_data(fn, dirname=sim_utils.RESULTS_DIRNAME)
 
     msg = '[%d/%d] %s (seed: %d)' % (params['idx'], params['n'], repo_dict['full_name'], seed)
     print_log(is_parallel, msg)
@@ -183,10 +177,11 @@ def run(arg_dict, params):
         'futures': futures,
         'res': res,
         'config': sim_config,
+        'params': params,
         'duration': duration,
     }
 
-    utils.write_data(fn, experiment, dirname=RESULTS_DIRNAME)
+    utils.write_data(fn, experiment, dirname=sim_utils.RESULTS_DIRNAME)
 
     return experiment
 
@@ -229,7 +224,7 @@ def main():
 
     config = utils.read_config()
     utils.ensure_datadir(TMP_REPOS)
-    utils.ensure_datadir(RESULTS_DIRNAME)
+    utils.ensure_datadir(sim_utils.RESULTS_DIRNAME)
     args.config = config
 
     run_experiments(args)
