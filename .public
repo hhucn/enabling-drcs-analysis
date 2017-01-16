@@ -15,7 +15,7 @@ print_result_stats.py
 query.py
 prepare_sim.py
 sim_runall.py
-simutils.py
+sim_utils.py
 utils.py
 
 Makefile

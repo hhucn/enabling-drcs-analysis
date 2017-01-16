@@ -4,7 +4,7 @@ import argparse
 import random
 import re
 
-import sim_lib
+import simutils
 import utils
 
 
@@ -25,7 +25,7 @@ def prepare(args, all_repos):
                 'n': n,
             }
 
-            if sim_lib.check_experiment(params, print):
+            if sim_utils.check_experiment(params, print):
                 tasks.append(params)
                 print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
 

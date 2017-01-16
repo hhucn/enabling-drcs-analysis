@@ -14,7 +14,7 @@ import git
 import download
 import gen_commit_lists
 import graph
-import simutils
+import sim_utils
 import utils
 
 
@@ -137,15 +137,15 @@ def run(params):
 
         future_commits = [tmp_repo.commit(f['sha']) for f in futures]
 
-        res['master'] = simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, [master_sha])
+        res['master'] = sim_utils.eval_all_straight(tmp_repo, commit_dict, future_commits, [master_sha])
 
         for ckey, shas in sorted(by_crits.items()):
             res['merge_greedy_%s' % ckey] = (
-                simutils.merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts))
+                sim_utils.merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts))
             res['mours_greedy_%s' % ckey] = (
-                simutils.merge_ours_greedy_diff_all(tmp_repo, future_commits, shas, head_counts))
+                sim_utils.merge_ours_greedy_diff_all(tmp_repo, future_commits, shas, head_counts))
             res['topmost_%s' % ckey] = (
-                simutils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
+                sim_utils.eval_all_straight(tmp_repo, commit_dict, future_commits, shas[:max_head_count])
             )
 
         if not params['args_keep']:
