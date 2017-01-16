@@ -13,7 +13,7 @@ DIRNAME = 'sim_tasks'
 
 def prepare(args, all_repos):
     rng = random.Random(0)
-    n = args.n
+    n = args.config['sim']['experiment_count']
     tasks = []
 
     while len(tasks) < n:
@@ -29,7 +29,9 @@ def prepare(args, all_repos):
             }
 
             if sim_lib.check_experiment(params, print):
-                tasks.push(params)
+                tasks.append(params)
+            else:
+                print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
 
 
 def main():
@@ -39,10 +41,6 @@ def main():
         '-f', '--filter',
         metavar='REGEXP', type=re.compile,
         help='Filter by repository fullname (regular expressions)')
-    parser.add_argument(
-        '-n', '--experiment-count', default=100,
-        metavar='COUNT', type=int, dest='n',
-        help='Number of experiments to perform (default: %(default)s)')
     args = parser.parse_args()
 
     config = utils.read_config()

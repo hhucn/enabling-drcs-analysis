@@ -19,7 +19,7 @@ def check_experiment(params, warn_func):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-        warn_func('No commit list for %s, skipping.' % repo_dict['full_name'])
+        warn_func('%s: No commit list, skipping.' % repo_dict['full_name'])
         return False
 
     sim_config = config['sim']
@@ -38,11 +38,13 @@ def check_experiment(params, warn_func):
     last_time = max_time - max(future_durations)
 
     if last_time < first_time:
-        warn_func('No experiment possible: Time range to small. Ignoring ...')
+        warn_func('%s: No experiment possible: Time range to small. Ignoring ...' % repo_dict['full_name'])
         return False
 
     ts = rng.randint(first_time, last_time)
     heads = list(graph.find_all_heads(commit_dict, ts))
     if len(heads) < sim_config['min_heads']:
-        warn_func('Ignoring %s: only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
+        warn_func('%s: Ignoring because only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
         return False
+
+    return True
