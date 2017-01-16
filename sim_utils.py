@@ -1,4 +1,5 @@
 import random
+import subprocess
 
 import git
 
@@ -27,6 +28,7 @@ def merge_once(tmp_repo, sha):
         tmp_repo.git.merge(sha)
         return True
     except git.exc.GitCommandError:
+        rm_gitcrap(tmp_repo.working_tree_dir)
         tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
         return False
 
@@ -41,9 +43,9 @@ def merge_ours(tmp_repo, sha):
         fns = list(unmerged_blobs)
         give_up = False
         try:
+            rm_gitcrap(tmp_repo.working_tree_dir)
             tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
         except git.exc.GitCommandError:
-            # TODO better: complicated, give up
             give_up = True
 
         if give_up or list(tmp_repo.index.unmerged_blobs()):
@@ -53,6 +55,7 @@ def merge_ours(tmp_repo, sha):
             except git.exc.GitCommandError:
                 pass
 
+        rm_gitcrap(tmp_repo.working_tree_dir)
         tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
         return False
 
@@ -167,3 +170,7 @@ def read_results():
             r = utils.read_data(fn, dirname=RESULTS_DIRNAME)
             res.append(r)
     return res
+
+
+def rm_gitcrap(basepath):
+    subprocess.check_call(['find', basepath, '-name', '.gitmodules', '-delete'])

@@ -152,6 +152,47 @@ class DiffTest(unittest.TestCase):
                 'files': 1,
             })
 
+    def test_invalid_submodules(self):
+        import diff
+
+        with tempfile.TemporaryDirectory(suffix='df-gha-test-submodules') as td:
+            def _cmd(argv):
+                subprocess.check_call(argv, cwd=td, stdout=subprocess.DEVNULL)
+
+            _cmd(['git', 'init'])
+            fn = os.path.join(td, 'txtfile')
+            with open(fn, 'wb') as f:
+                f.write(b'data does\n\nmatter\nhere\n')
+            _cmd(['git', 'add', fn])
+            _cmd(['git', 'commit', '-m', 'v1'])
+            _cmd(['git', 'tag', 'v1'])
+
+            with open(fn, 'wb') as f:
+                f.write(b'the data does\n\nmatter\nhere\n')
+            _cmd(['git', 'add', fn])
+            _cmd(['git', 'commit', '-m', 'v2'])
+            _cmd(['git', 'tag', 'v2'])
+
+            subm_content = (
+                '<<<<<<< HEAD\n' +
+                '[submodule "Carthage.checkout/LlamaKit"]\n' +
+                '\tpath = Carthage/Checkouts/LlamaKit\n' +
+                '\turl = https://github.com/LlamaKit/LlamaKit.git\n' +
+                '=======\n'
+            )
+            subm_fn = os.path.join(td, '.gitmodules')
+            with open(subm_fn, 'wb') as f:
+                f.write(subm_content.encode('utf-8'))
+
+            repo = git.Repo(td)
+            v1 = repo.commit('v1')
+            dres = diff.eval(v1, None)
+            self.assertEqual(dres, {
+                'lines': 5,
+                'len': 1,
+                'files': 2,
+            })
+
 
 if __name__ == '__main__':
     unittest.main()
