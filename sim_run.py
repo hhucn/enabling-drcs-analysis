@@ -180,11 +180,12 @@ def run_experiments(args):
     tasks = utils.read_data('sim_tasks')
     for t in tasks:
         t['is_parallel'] = args.parallel
+        t['args_keep'] = args.keep
 
     with multiprocessing.Pool() as pool:
         map_func = pool.imap_unordered if args.parallel else map
         try:
-            for count, _ in enumerate(map_func(run, tasks)):
+            for count, _ in enumerate(map_func(run, tasks), start=1):
                 print('Completed %d/%d experiments' % (count, len(tasks)))
         except KeyboardInterrupt:
             traceback.print_exc()
@@ -197,6 +198,10 @@ def main():
         '-p', '--parallel', action='store_true',
         help='Run in parallel'
     )
+    parser.add_argument(
+        '-k', '--keep',
+        action='store_true',
+        help='Keep temporary directories')
     args = parser.parse_args()
 
     config = utils.read_config()

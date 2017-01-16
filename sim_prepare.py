@@ -9,7 +9,7 @@ import utils
 
 
 def prepare(args, all_repos):
-    rng = random.Random(0)
+    rng = random.Random(42)
     n = args.config['sim']['experiment_count']
     tasks = []
     printfunc = (lambda x: x) if args.quiet else print
@@ -17,7 +17,7 @@ def prepare(args, all_repos):
     while len(tasks) < n:
         for i in range(len(tasks), n):
             rd = rng.choice(all_repos)
-            seed = rng.random()
+            seed = rng.randint(0, 2**64)
             params = {
                 'config': args.config,
                 'repo_dict': rd,

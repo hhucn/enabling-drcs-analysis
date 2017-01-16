@@ -6,7 +6,6 @@ import re
 import statistics
 import sys
 
-import sim
 import utils
 from print_helpers import HUMAN_NAMES
 
