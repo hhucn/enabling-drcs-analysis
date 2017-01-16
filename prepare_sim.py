@@ -27,7 +27,6 @@ def prepare(args, all_repos):
 
             if sim_lib.check_experiment(params, print):
                 tasks.append(params)
-            else:
                 print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
 
     return tasks

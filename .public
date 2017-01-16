@@ -13,7 +13,8 @@ print_repo_stats.py
 print_results.py
 print_result_stats.py
 query.py
-sim.py
+prepare_sim.py
+sim_runall.py
 simutils.py
 utils.py
 
