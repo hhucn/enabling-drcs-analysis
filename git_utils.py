@@ -20,6 +20,12 @@ def make_home_dir():
     return dn
 
 
+def unlock(basepath):
+    lock_fn = os.path.join(basepath, '.git', 'index.lock')
+    if os.path.exists(lock_fn):
+        os.unlink(lock_fn)
+
+
 def check_unlocked(basepath):
     lock_fn = os.path.join(basepath, '.git', 'index.lock')
     if os.path.exists(lock_fn):

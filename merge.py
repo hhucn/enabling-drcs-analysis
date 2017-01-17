@@ -1,3 +1,5 @@
+import subprocess
+
 import git
 
 import git_utils
@@ -18,11 +20,18 @@ def merge_once(tmp_repo, sha):
 
 def merge_ours(tmp_repo, sha):
     cur_sha = tmp_repo.head.object.hexsha
+    git_utils.check_unlocked(tmp_repo.working_tree_dir)
     try:
-        tmp_repo.git.merge(sha)
+        subprocess.check_call(
+            ['git', 'merge', sha],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=tmp_repo.working_tree_dir)
         return True
-    except git.exc.GitCommandError:
-        git_utils.check_unlocked(tmp_repo.working_tree_dir)
+    except subprocess.CalledProcessError:
+        git_utils.unlock(tmp_repo.working_tree_dir)
+        # git_utils.check_unlocked(tmp_repo.working_tree_dir)
+
         unmerged_blobs = tmp_repo.index.unmerged_blobs()
         fns = list(unmerged_blobs)
         git_utils.check_unlocked(tmp_repo.working_tree_dir)
