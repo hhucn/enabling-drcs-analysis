@@ -43,7 +43,7 @@ def merge_ours(tmp_repo, sha):
         git_utils.check_unlocked(tmp_repo.working_tree_dir)
         git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
         tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
-        git_utils.check_unlocked()
+        git_utils.check_unlocked(tmp_repo.working_tree_dir)
         return False
 
 
