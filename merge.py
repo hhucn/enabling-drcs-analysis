@@ -22,13 +22,9 @@ def merge_ours(tmp_repo, sha):
     cur_sha = tmp_repo.head.object.hexsha
     git_utils.check_unlocked(tmp_repo.working_tree_dir)
     try:
-        subprocess.check_call(
-            ['git', 'merge', sha],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            cwd=tmp_repo.working_tree_dir)
+        tmp_repo.git.merge(sha)
         return True
-    except subprocess.CalledProcessError:
+    except git.exc.GitCommandError:
         git_utils.unlock(tmp_repo.working_tree_dir)
         # git_utils.check_unlocked(tmp_repo.working_tree_dir)
 
