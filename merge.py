@@ -34,11 +34,13 @@ def merge_ours(tmp_repo, sha):
             give_up = True
 
         git_utils.check_unlocked(tmp_repo.working_tree_dir)
-        try:
-            git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
-            tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
-        except git.exc.GitCommandError:
-            give_up = True
+
+        if not give_up:
+            try:
+                git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
+                tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
+            except git.exc.GitCommandError:
+                give_up = True
 
         git_utils.check_unlocked(tmp_repo.working_tree_dir)
 
