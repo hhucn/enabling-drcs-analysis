@@ -180,6 +180,8 @@ def run(arg_dict, params):
 
 def run_experiments(args):
     tasks = utils.read_data('sim_tasks')
+    if args.start_at:
+        tasks = tasks[args.start_at:]
     arg_dict = {
         'parallel': args.parallel,
         'keep': args.keep,
@@ -212,6 +214,11 @@ def main():
         default=False,
         action='store_true',
         help='Do experiments that have been done already')
+    parser.add_argument(
+        '-s', '--start-at', metavar='INDEX',
+        default=0,
+        type=int,
+        help='Start at the specified index (i.e. skip the first INDEX experiments)')
     args = parser.parse_args()
 
     config = utils.read_config()
