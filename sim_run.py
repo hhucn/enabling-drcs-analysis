@@ -130,7 +130,7 @@ def run(arg_dict, params):
     head_counts = sim_config['experiments_head_counts']
     max_head_count = max(head_counts)
 
-    suffix = '-%s-%d' % (utils.timestr(time.time()), seed)
+    suffix = '-%s-%d-%d' % (utils.timestr(time.time()), seed, os.getpid())
     tmp_repo_path = utils.calc_filename(
         basename, dirname=TMP_REPOS, suffix=suffix)
     assert basename in tmp_repo_path
