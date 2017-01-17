@@ -15,7 +15,7 @@ RESULTS_DIRNAME = 'sim_results'
 
 class SimulationError(BaseException):
     def __init__(self, message):
-        super().__init()
+        super().__init__(message)
         self.message = message
 
 
