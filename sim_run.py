@@ -13,7 +13,7 @@ import git
 
 import download
 import gen_commit_lists
-import git_util
+import git_utils
 import graph
 import sim_utils
 import utils
@@ -219,7 +219,7 @@ def main():
     utils.ensure_datadir(sim_utils.RESULTS_DIRNAME)
     args.config = config
 
-    git_util.setup()
+    git_utils.setup()
 
     run_experiments(args)
 
