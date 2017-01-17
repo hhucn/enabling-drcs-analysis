@@ -11,8 +11,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class DiffTest(unittest.TestCase):
     def setUp(self):
-        import git_util
-        git_util.setup()
+        import git_utils
+        git_utils.setup()
 
     def test_diff_bin(self):
         import diff
@@ -188,8 +188,8 @@ class DiffTest(unittest.TestCase):
             with open(subm_fn, 'wb') as f:
                 f.write(subm_content.encode('utf-8'))
 
-            import sim_utils
-            sim_utils.rm_gitcrap(td)
+            import git_utils
+            git_utils.rm_gitcrap(td)
 
             repo = git.Repo(td)
             v1 = repo.commit('v1')

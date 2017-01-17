@@ -3,7 +3,6 @@
 import argparse
 import functools
 import multiprocessing
-import os
 import random
 import re
 import shutil
