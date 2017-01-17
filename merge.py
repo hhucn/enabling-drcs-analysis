@@ -22,8 +22,10 @@ def merge_ours(tmp_repo, sha):
         tmp_repo.git.merge(sha)
         return True
     except git.exc.GitCommandError:
+        git_utils.check_unlocked(tmp_repo.working_tree_dir)
         unmerged_blobs = tmp_repo.index.unmerged_blobs()
         fns = list(unmerged_blobs)
+        git_utils.check_unlocked(tmp_repo.working_tree_dir)
         give_up = False
         try:
             git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
