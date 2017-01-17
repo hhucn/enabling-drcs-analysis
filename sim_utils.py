@@ -7,8 +7,16 @@ import graph
 import merge
 import utils
 
+import git
+
 
 RESULTS_DIRNAME = 'sim_results'
+
+
+class SimulationError(BaseException):
+    def __init__(self, message):
+        super().__init()
+        self.message = message
 
 
 def get_metadata(commit_dict, sha):
@@ -25,7 +33,11 @@ def merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts, mergefunc
     hc_it = iter(head_counts)
     hc = next(hc_it)
     all_res = []
-    tmp_repo.git.checkout(shas[0], force=True)
+    try:
+        tmp_repo.git.checkout(shas[0], force=True)
+    except git.exc.GitCommandError as gce:
+        raise SimulationError(gce.message)
+
     merged = [shas[0]]
     for idx, sha in enumerate(shas[1:], start=1):
         assert idx <= hc
@@ -131,5 +143,6 @@ def read_results():
         fn = calc_fn(params)
         if utils.data_exists(fn, dirname=RESULTS_DIRNAME):
             r = utils.read_data(fn, dirname=RESULTS_DIRNAME)
-            res.append(r)
+            if not r.get('errored'):
+                res.append(r)
     return res

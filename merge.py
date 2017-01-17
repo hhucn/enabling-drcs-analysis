@@ -1,5 +1,3 @@
-import subprocess
-
 import git
 
 import git_utils

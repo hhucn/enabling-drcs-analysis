@@ -3,6 +3,7 @@
 import argparse
 import functools
 import multiprocessing
+import os
 import random
 import re
 import shutil
@@ -135,6 +136,16 @@ def run(arg_dict, params):
         basename, dirname=TMP_REPOS, suffix=suffix)
     assert basename in tmp_repo_path
 
+    experiment = {
+        'repo': basename,
+        'all_heads': by_crits['depth'],
+        'ts': ts,
+        'master_sha': master_sha,
+        'futures': futures,
+        'config': sim_config,
+        'params': params,
+    }
+
     res = {}
     try:
         repo.clone(tmp_repo_path)
@@ -159,22 +170,17 @@ def run(arg_dict, params):
         if not arg_dict['keep']:
             shutil.rmtree(tmp_repo_path)
         raise
+    except sim_utils.SimulationError as se:
+        if not arg_dict['keep']:
+            shutil.rmtree(tmp_repo_path)
+        experiment['errored'] = True
+        experiment['error_message'] = se.message
     except Exception as e:
         raise
-
-    experiment = {
-        'repo': basename,
-        'all_heads': by_crits['depth'],
-        'ts': ts,
-        'master_sha': master_sha,
-        'futures': futures,
-        'res': res,
-        'config': sim_config,
-        'params': params,
-    }
+    else:
+        experiment['res'] = res
 
     utils.write_data(fn, experiment, dirname=sim_utils.RESULTS_DIRNAME)
-
     return experiment
 
 
