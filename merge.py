@@ -28,10 +28,14 @@ def merge_ours(tmp_repo, sha):
         git_utils.unlock(tmp_repo.working_tree_dir)
         # git_utils.check_unlocked(tmp_repo.working_tree_dir)
 
-        unmerged_blobs = tmp_repo.index.unmerged_blobs()
-        fns = list(unmerged_blobs)
-        git_utils.check_unlocked(tmp_repo.working_tree_dir)
         give_up = False
+        try:
+            unmerged_blobs = tmp_repo.index.unmerged_blobs()
+            fns = list(unmerged_blobs)
+        except UnicodeDecodeError:
+            give_up = True
+
+        git_utils.check_unlocked(tmp_repo.working_tree_dir)
         try:
             git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
             tmp_repo.git.execute(['git', 'checkout', cur_sha, '--'] + fns)
