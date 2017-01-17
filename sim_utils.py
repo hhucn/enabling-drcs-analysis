@@ -99,6 +99,19 @@ def check_experiment(params, warn_func):
         warn_func('%s: Ignoring because only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
         return False
 
+    def find_master_commit(ts):
+        c = commit_dict[commit_list_data['master_head']]
+        while c['ts'] > ts:
+            parents = c['parents']
+            if not parents:
+                return None
+            c = commit_dict[parents[0]]
+        return c
+
+    if not find_master_commit(ts):
+        warn_func('%s: Cannot find master at time %s' % (basename, utils.timestr(ts)))
+        return False
+
     return True
 
 
