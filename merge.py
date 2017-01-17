@@ -9,8 +9,10 @@ def merge_once(tmp_repo, sha):
         tmp_repo.git.merge(sha)
         return True
     except git.exc.GitCommandError:
+        git_utils.check_unlocked()
         git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
         tmp_repo.git.execute(['git', 'reset', '--hard', tmp_repo.head.object.hexsha])
+        git_utils.check_unlocked()
         return False
 
 
@@ -29,6 +31,8 @@ def merge_ours(tmp_repo, sha):
         except git.exc.GitCommandError:
             give_up = True
 
+        git_utils.check_unlocked()
+
         if give_up or list(tmp_repo.index.unmerged_blobs()):
             try:
                 tmp_repo.git.execute(['git', 'commit', '-am', 'accept anything open'])
@@ -36,8 +40,10 @@ def merge_ours(tmp_repo, sha):
             except git.exc.GitCommandError:
                 pass
 
+        git_utils.check_unlocked()
         git_utils.rm_gitcrap(tmp_repo.working_tree_dir)
         tmp_repo.git.execute(['git', 'reset', '--hard', cur_sha])
+        git_utils.check_unlocked()
         return False
 
 
