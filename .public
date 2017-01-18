@@ -20,6 +20,7 @@ print_tasks.py
 query.py
 sim_prepare.py
 sim_run.py
+sim_status.py
 sim_utils.py
 utils.py
 

@@ -139,13 +139,13 @@ def calc_fn(params):
     )
 
 
-def read_results():
+def read_results(include_errored=False):
     tasks = utils.read_data('sim_tasks')
     res = []
     for params in tasks:
         fn = calc_fn(params)
         if utils.data_exists(fn, dirname=RESULTS_DIRNAME):
             r = utils.read_data(fn, dirname=RESULTS_DIRNAME)
-            if not r.get('errored'):
+            if include_errored or not r.get('errored'):
                 res.append(r)
     return res
