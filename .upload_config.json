@@ -1,7 +1,7 @@
 {
   "remotes": [
     {
-      "host": "i6",
+      "host": "i8",
       "port": 22,
       "dir": "/home/phihag/gha/",
       "username": "phihag"

@@ -175,3 +175,12 @@ def percentile(percent, data):
     d0 = sorted_data[int(f)] * (c-k)
     d1 = sorted_data[int(c)] * (k-f)
     return d0+d1
+
+
+class EmptyContextManager(object):
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type, value, tb):
+        pass
+

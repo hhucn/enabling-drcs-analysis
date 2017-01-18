@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import contextlib
 import functools
 import multiprocessing
 import os
@@ -195,7 +196,9 @@ def run_experiments(args):
     }
     run_with_args = functools.partial(run, arg_dict)
 
-    with multiprocessing.Pool() as pool:
+    make_pool = multiprocessing.Pool if args.parallel else utils.EmptyContextManager
+
+    with make_pool() as pool:
         map_func = pool.imap_unordered if args.parallel else map
         try:
             for _ in map_func(run_with_args, tasks):
