@@ -28,9 +28,13 @@ def get_candidates(e, diff_idx, diff_key):
             outk = k
 
         if k.startswith('merge_') or k.startswith('mours_'):
-            for pval in [2, 5, 10, 20, 50]:
-                candidates['%s_%d' % (outk, pval)] = next(
-                    d['diffs'][diff_idx][diff_key] for d in v if d['param'] == pval)
+            for pval in [2, 5, 10, 20, 40]:
+                try:
+                    candidates['%s_%d' % (outk, pval)] = next(
+                        d['diffs'][diff_idx][diff_key] for d in v if d['param'] == pval)
+                except StopIteration as si:
+                    sys.stderr.write('%s: Cannot find %s-%s-%s [%s]\n' % (e['repo'], diff_idx, diff_key, pval, k))
+                    raise
             continue
         if k == 'topmost_random':
             candidates['%s_0' % (k)] = next(d['diffs'][diff_idx][diff_key] for d in v)

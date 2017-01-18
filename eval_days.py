@@ -5,8 +5,7 @@ import argparse
 import statistics
 
 
-import sim
-import utils
+import sim_utils
 
 
 def cv(data):
@@ -107,15 +106,10 @@ def eval_days(args, experiments):
 def main():
     parser = argparse.ArgumentParser(
         'Gather statistics about impact of the "days in the future" parameter')
-    parser.add_argument('-i', '--input-file', metavar='FILE', help='Read results from this file instead of the default')
     args = parser.parse_args()
 
-    if args.input_file:
-        experiments = utils.read_json(args.input_file)
-    else:
-        experiments = utils.read_data('experiments', dirname=sim.DIRNAME)
-
-    eval_days(args, experiments)
+    results = sim_utils.read_results()
+    eval_days(args, results)
 
 
 if __name__ == '__main__':

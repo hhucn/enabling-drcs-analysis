@@ -42,8 +42,6 @@ def main():
     err_str = ','.join(map(str, errored)) if errored else 'nothing (fingers crossed)'
     print('errored: %s [%d/%d, %d%%]' % (err_str, len(errored), n, int(round(100 * len(errored) / n))))
 
-    # TODO handle errored differently
-
 
 if __name__ == '__main__':
     main()
