@@ -36,7 +36,10 @@ def merge_greedy_diff_all(tmp_repo, future_commits, shas, head_counts, mergefunc
     try:
         tmp_repo.git.checkout(shas[0], force=True)
     except git.exc.GitCommandError as gce:
-        raise SimulationError(gce.stderr.decode('utf8', 'replace'))
+        msg = gce.stderr
+        if isinstance(msg, bytes):
+            msg = msg.decode('utf8', 'replace')
+        raise SimulationError(msg)
 
     merged = [shas[0]]
     for idx, sha in enumerate(shas[1:], start=1):
