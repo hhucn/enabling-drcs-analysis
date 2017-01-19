@@ -2,6 +2,7 @@
 
 import argparse
 import collections
+import functools
 import random
 import re
 
@@ -13,10 +14,11 @@ def prepare(args, all_repos):
     rng = random.Random(42)
     n = args.config['sim']['experiment_count']
     tasks = []
-    warnings = collections.Counter()
+    warnings = collections.defaultdict(list)
 
-    def warnfunc(code, msg):
-        warnings[code] += 1
+    def warnfunc(repo_dict, code, msg):
+        basename = utils.safe_filename(repo_dict['full_name'])
+        warnings[code].append(basename)
         if not args.quiet:
             print(msg)
 
@@ -31,8 +33,9 @@ def prepare(args, all_repos):
                 'idx': len(tasks),
                 'n': n,
             }
+            wf = functools.partial(warnfunc, rd)
 
-            if sim_utils.check_experiment(params, warnfunc):
+            if sim_utils.check_experiment(params, wf):
                 tasks.append(params)
                 if not args.quiet:
                     print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
@@ -70,7 +73,7 @@ def main():
     tasks, warnings = prepare(args, all_repos)
 
     utils.write_data('sim_tasks', tasks)
-    utils.write_data('sim_warnings', tasks)
+    utils.write_data('sim_warnings', warnings)
 
 
 if __name__ == '__main__':
