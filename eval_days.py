@@ -48,44 +48,43 @@ def eval_days(args, results):
 
     print('\\begin{tabular}[here]{l|%s}' % ''.join('r' for _ in days))
     print('Days & %s \\\\ \\hline' % (' & '.join('%s' % d for d in days)))
-    print('\\\\ \hline')
     print('Median diff lines \\\\ (best strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(
+        int(round(statistics.median(
             min(ex.values())
             for ex in by_days[d]['lines_by_experiment'].values()
-        ))
+        ))))
         for d in days)))
     print('Median diff lines \\\\ (median strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(
+        int(round(statistics.median(
             statistics.median(ex.values())
             for ex in by_days[d]['lines_by_experiment'].values()
-        ))
+        ))))
         for d in days)))
     print('Median diff lines \\\\ (worst strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(
+        int(round(statistics.median(
             max(ex.values())
             for ex in by_days[d]['lines_by_experiment'].values()
-        ))
+        ))))
         for d in days)))
 
     print('\\\\ \hline')
     print('Median diff chunks \\\\ (best strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(
+        int(round(statistics.median(
             min(ex.values())
             for ex in by_days[d]['chunks_by_experiment'].values()
-        ))
+        ))))
         for d in days)))
     print('Median diff chunks \\\\ (median strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(
+        int(round(statistics.median(
             statistics.median(ex.values())
             for ex in by_days[d]['chunks_by_experiment'].values()
-        ))
+        ))))
         for d in days)))
     print('Median diff chunks \\\\ (worst strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(
+        int(round(statistics.median(
             max(ex.values())
             for ex in by_days[d]['chunks_by_experiment'].values()
-        ))
+        ))))
         for d in days)))
     print('\\end{tabular}')
 
