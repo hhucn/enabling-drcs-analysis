@@ -12,8 +12,8 @@ def cv(data):
     return statistics.stdev(data) / statistics.mean(data)
 
 
-def eval_days(args, experiments):
-    futures = experiments[0]['futures']
+def eval_days(args, results):
+    futures = results[0]['futures']
     by_days = {
         f['days']: {
             'total_num_results': 0,  # Number of total results evaluated
@@ -24,7 +24,7 @@ def eval_days(args, experiments):
             'chunks_by_experiment': {},
         } for f in futures
     }
-    for eid, e in enumerate(experiments):
+    for eid, e in enumerate(results):
         for family, results in e['res'].items():
             for result in results:
                 strat_id = '%s_%s' % (family, result['param'])
@@ -52,54 +52,41 @@ def eval_days(args, experiments):
     print('Median diff lines \\\\ (best strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
         statistics.median(
             min(ex.values())
-            for ex in by_days[d]['lines_by_experiment'].values())
-        for d in days))))
+            for ex in by_days[d]['lines_by_experiment'].values()
+        ))
+        for d in days)))
     print('Median diff lines \\\\ (median strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
         statistics.median(
             statistics.median(ex.values())
-            for ex in by_days[d]['lines_by_experiment'].values())
-        for d in days))))
-    # print('Median diff lines \\\\ (master) & %s \\\\ \\hline' % (' & '.join('%s' %
-    #     statistics.median(
-    #         ex['master_0']
-    #         for ex in by_days[d]['lines_by_experiment'].values())
-    #     for d in days)))
-    print('Median diff lines \\\\ (All strategies) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(by_days[d]['all_line_diffs']) for d in days))))
+            for ex in by_days[d]['lines_by_experiment'].values()
+        ))
+        for d in days)))
     print('Median diff lines \\\\ (worst strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
         statistics.median(
             max(ex.values())
-            for ex in by_days[d]['lines_by_experiment'].values())
-        for d in days))))
+            for ex in by_days[d]['lines_by_experiment'].values()
+        ))
+        for d in days)))
+
     print('\\\\ \hline')
     print('Median diff chunks \\\\ (best strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
         statistics.median(
             min(ex.values())
-            for ex in by_days[d]['chunks_by_experiment'].values())
-        for d in days))))
+            for ex in by_days[d]['chunks_by_experiment'].values()
+        ))
+        for d in days)))
     print('Median diff chunks \\\\ (median strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
         statistics.median(
             statistics.median(ex.values())
-            for ex in by_days[d]['chunks_by_experiment'].values())
-        for d in days))))
-    # print('Median diff chunks \\\\ (master) & %s \\\\ \\hline' % (' & '.join('%s' %
-    #     statistics.median(
-    #         ex['master_0']
-    #         for ex in by_days[d]['chunks_by_experiment'].values())
-    #     for d in days)))
-    print('Median diff chunks \\\\ (All strategies) & %s \\\\ \\hline' % (' & '.join('%s' % (
-        statistics.median(by_days[d]['all_chunk_diffs']) for d in days))))
+            for ex in by_days[d]['chunks_by_experiment'].values()
+        ))
+        for d in days)))
     print('Median diff chunks \\\\ (worst strategy) & %s \\\\ \\hline' % (' & '.join('%s' % (
         statistics.median(
             max(ex.values())
-            for ex in by_days[d]['chunks_by_experiment'].values())
-        for d in days))))
-
-    # print('5\\%% quantil of CV & %s \\\\ \\hline' % (' & '.join('%d' %
-    #     utils.percentile(0.5,
-    #         [cv(experiment.values())
-    #          for experiment in by_days[d]['lines_by_experiment'].values()]
-    #     ) for d in days)))
+            for ex in by_days[d]['chunks_by_experiment'].values()
+        ))
+        for d in days)))
     print('\\end{tabular}')
 
 
