@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import collections
 import random
 import re
 
@@ -12,7 +13,12 @@ def prepare(args, all_repos):
     rng = random.Random(42)
     n = args.config['sim']['experiment_count']
     tasks = []
-    printfunc = (lambda x: x) if args.quiet else print
+    warnings = collections.Counter()
+
+    def warnfunc(code, msg):
+        warnings[code] += 1
+        if not args.quiet:
+            print(msg)
 
     while len(tasks) < n:
         for i in range(len(tasks), n):
@@ -26,11 +32,12 @@ def prepare(args, all_repos):
                 'n': n,
             }
 
-            if sim_utils.check_experiment(params, printfunc):
+            if sim_utils.check_experiment(params, warnfunc):
                 tasks.append(params)
-                printfunc('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
+                if not args.quiet:
+                    print('%s: Added, now got %d/%d tasks!' % (rd['full_name'], len(tasks), n))
 
-    return tasks
+    return tasks, warnings
 
 
 def main():
@@ -60,9 +67,10 @@ def main():
         return True
 
     all_repos = list(filter(_should_visit, utils.read_data('list')))
-    tasks = prepare(args, all_repos)
+    tasks, warnings = prepare(args, all_repos)
 
     utils.write_data('sim_tasks', tasks)
+    utils.write_data('sim_warnings', tasks)
 
 
 if __name__ == '__main__':

@@ -87,7 +87,7 @@ def check_experiment(params, warn_func):
     basename = utils.safe_filename(repo_dict['full_name'])
 
     if not utils.data_exists(basename, gen_commit_lists.DIRNAME):
-        warn_func('%s: No commit list, skipping.' % repo_dict['full_name'])
+        warn_func('no_commit_list', '%s: No commit list, skipping.' % repo_dict['full_name'])
         return False
 
     sim_config = config['sim']
@@ -105,13 +105,17 @@ def check_experiment(params, warn_func):
     last_time = max_time - max(future_durations)
 
     if last_time < first_time:
-        warn_func('%s: No experiment possible: Time range to small. Ignoring ...' % repo_dict['full_name'])
+        warn_func(
+            'time_range',
+            '%s: No experiment possible: Time range to small. Ignoring ...' % repo_dict['full_name'])
         return False
 
     ts = rng.randint(first_time, last_time)
     heads = list(graph.find_all_heads(commit_dict, ts))
     if len(heads) < sim_config['min_heads']:
-        warn_func('%s: Ignoring because only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
+        warn_func(
+            'not_enough_heads',
+            '%s: Ignoring because only %d heads (<%d)' % (basename, len(heads), sim_config['min_heads']))
         return False
 
     def find_master_commit(ts):
@@ -124,7 +128,7 @@ def check_experiment(params, warn_func):
         return c
 
     if not find_master_commit(ts):
-        warn_func('%s: Cannot find master at time %s' % (basename, utils.timestr(ts)))
+        warn_func('no_master', '%s: Cannot find master at time %s' % (basename, utils.timestr(ts)))
         return False
 
     return True

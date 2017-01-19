@@ -183,4 +183,3 @@ class EmptyContextManager(object):
 
     def __exit__(self, type, value, tb):
         pass
-
